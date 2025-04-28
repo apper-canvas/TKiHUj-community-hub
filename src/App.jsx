@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { BrowserRouter as Router, Routes, Route, Link, useLocation } from "react-router-dom";
-import { Sun, Moon, Menu, X, Bell, Calendar, Tool, User, LogOut } from "lucide-react";
+import { Sun, Moon, Menu, X, Bell, Calendar, Wrench, User, LogOut } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import Home from "./pages/Home";
 import Dashboard from "./pages/Dashboard";
@@ -14,7 +14,7 @@ const Sidebar = ({ isOpen, toggleSidebar }) => {
     { icon: User, text: "Home", path: "/" },
     { icon: Calendar, text: "Dashboard", path: "/dashboard" },
     { icon: Calendar, text: "Events", path: "/events" },
-    { icon: Tool, text: "Resources", path: "/resources" },
+    { icon: Wrench, text: "Resources", path: "/resources" },
   ];
 
   return (

@@ -1,150 +1,320 @@
-import React from 'react';
-import { Calendar, Clock, MapPin, Users } from 'lucide-react';
+import React, { useState } from "react";
+import { Calendar, MapPin, Clock, Filter, Plus, ChevronLeft, ChevronRight } from "lucide-react";
+import { format, addMonths, subMonths, startOfMonth, endOfMonth, eachDayOfInterval, getDay, isSameMonth, isToday, isSameDay } from "date-fns";
 
 const Events = () => {
-  const upcomingEvents = [
+  const [currentMonth, setCurrentMonth] = useState(new Date());
+  const [selectedDate, setSelectedDate] = useState(new Date());
+  const [viewMode, setViewMode] = useState("month"); // "month" or "list"
+  
+  // Sample events data
+  const events = [
     {
       id: 1,
-      title: 'Community Meetup',
-      date: 'May 15, 2023',
-      time: '6:00 PM - 8:00 PM',
-      location: 'Community Center, 123 Main St',
-      description: 'Join us for our monthly community meetup! This is a great opportunity to network, share ideas, and learn from others in the community.',
-      attendees: 24,
-      image: 'https://images.unsplash.com/photo-1528605105345-5344ea20e269?ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=80'
+      title: "Community Meeting",
+      date: new Date(2023, 5, 18, 15, 0),
+      location: "Community Center",
+      description: "Monthly community meeting to discuss upcoming projects and initiatives.",
+      type: "meeting",
     },
     {
       id: 2,
-      title: 'Workshop: Introduction to React',
-      date: 'May 20, 2023',
-      time: '3:00 PM - 5:00 PM',
-      location: 'Tech Hub, 456 Innovation Ave',
-      description: 'Learn the fundamentals of React in this hands-on workshop. Bring your laptop and be ready to code!',
-      attendees: 45,
-      image: 'https://images.unsplash.com/photo-1517048676732-d65bc937f952?ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=80'
+      title: "Summer Picnic",
+      date: new Date(2023, 5, 24, 12, 0),
+      location: "Central Park",
+      description: "Annual summer picnic for all community members. Bring your family and enjoy food, games, and music!",
+      type: "social",
     },
     {
       id: 3,
-      title: 'Networking Event',
-      date: 'May 25, 2023',
-      time: '5:30 PM - 7:30 PM',
-      location: 'The Gathering Space, 789 Networking Blvd',
-      description: 'Expand your professional network at this casual networking event. Light refreshments will be provided.',
-      attendees: 32,
-      image: 'https://images.unsplash.com/photo-1536510233921-8e5043fce771?ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=80'
+      title: "Neighborhood Cleanup",
+      date: new Date(2023, 5, 15, 9, 0),
+      location: "Main Street",
+      description: "Volunteer event to clean up our neighborhood. Supplies will be provided.",
+      type: "volunteer",
     },
     {
       id: 4,
-      title: 'Annual Community Festival',
-      date: 'June 10, 2023',
-      time: '11:00 AM - 6:00 PM',
-      location: 'Community Park, 321 Festival Way',
-      description: 'Our biggest event of the year! Join us for food, music, games, and more. Fun for the whole family!',
-      attendees: 150,
-      image: 'https://images.unsplash.com/photo-1492684223066-81342ee5ff30?ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=80'
+      title: "Board Election",
+      date: new Date(2023, 5, 30, 18, 0),
+      location: "Online",
+      description: "Annual board member election meeting. All residents are encouraged to attend and vote.",
+      type: "meeting",
     },
     {
       id: 5,
-      title: 'Tech Talk: The Future of AI',
-      date: 'June 15, 2023',
-      time: '7:00 PM - 8:30 PM',
-      location: 'Modern Auditorium, 555 Tech Parkway',
-      description: 'Hear from industry experts about the latest developments in artificial intelligence and what the future holds.',
-      attendees: 78,
-      image: 'https://images.unsplash.com/photo-1485827404703-89b55fcc595e?ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=80'
-    }
+      title: "Kids Fun Day",
+      date: new Date(2023, 5, 20, 10, 0),
+      location: "Community Park",
+      description: "A day filled with games, activities, and entertainment for children of all ages.",
+      type: "social",
+    },
   ];
-
+  
+  // Functions for calendar navigation
+  const prevMonth = () => {
+    setCurrentMonth(subMonths(currentMonth, 1));
+  };
+  
+  const nextMonth = () => {
+    setCurrentMonth(addMonths(currentMonth, 1));
+  };
+  
+  // Function to get events for a specific date
+  const getEventsForDate = (date) => {
+    return events.filter(event => isSameDay(event.date, date));
+  };
+  
+  // Function to render the calendar grid
+  const renderCalendarDays = () => {
+    const monthStart = startOfMonth(currentMonth);
+    const monthEnd = endOfMonth(monthStart);
+    const startDate = monthStart;
+    const endDate = monthEnd;
+    
+    const dateFormat = "d";
+    const days = [];
+    
+    const daysInMonth = eachDayOfInterval({
+      start: startDate,
+      end: endDate
+    });
+    
+    // Get day names
+    const dayNames = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
+    
+    // Create header row with day names
+    const dayNamesRow = dayNames.map((day, index) => (
+      <div key={index} className="text-center font-medium text-gray-500 py-2">
+        {day}
+      </div>
+    ));
+    days.push(<div key="header" className="grid grid-cols-7">{dayNamesRow}</div>);
+    
+    // Calculate the start position for the first day of the month
+    let firstDayOfMonthIndex = getDay(monthStart);
+    
+    // Create calendar grid
+    let daysGrid = [];
+    
+    // Add empty cells for days before the start of the month
+    for (let i = 0; i < firstDayOfMonthIndex; i++) {
+      daysGrid.push(
+        <div key={`empty-${i}`} className="h-24 border p-1 bg-gray-50"></div>
+      );
+    }
+    
+    // Add cells for each day of the month
+    daysInMonth.forEach((day, dayIndex) => {
+      const dayEvents = getEventsForDate(day);
+      const isCurrentMonth = isSameMonth(day, currentMonth);
+      const isSelected = isSameDay(day, selectedDate);
+      const isCurrentDay = isToday(day);
+      
+      daysGrid.push(
+        <div 
+          key={dayIndex} 
+          className={`h-24 border p-1 relative ${
+            !isCurrentMonth ? 'bg-gray-50' : 
+            isSelected ? 'bg-blue-50' : ''
+          }`}
+          onClick={() => setSelectedDate(day)}
+        >
+          <div className={`absolute top-1 right-1 rounded-full h-6 w-6 flex items-center justify-center ${
+            isCurrentDay ? 'bg-blue-500 text-white' : ''
+          }`}>
+            {format(day, dateFormat)}
+          </div>
+          <div className="mt-6 space-y-1 overflow-hidden">
+            {dayEvents.map((event, eventIndex) => (
+              <div 
+                key={eventIndex}
+                className={`text-xs truncate rounded px-1 py-0.5 ${
+                  event.type === 'meeting' ? 'bg-blue-100 text-blue-800' :
+                  event.type === 'social' ? 'bg-purple-100 text-purple-800' :
+                  'bg-green-100 text-green-800'
+                }`}
+              >
+                {event.title}
+              </div>
+            ))}
+          </div>
+        </div>
+      );
+    });
+    
+    // Add empty cells for days after the end of the month to complete the grid
+    const totalCellsInGrid = 42; // 6 rows of 7 days
+    const remainingCells = totalCellsInGrid - (firstDayOfMonthIndex + daysInMonth.length);
+    
+    for (let i = 0; i < remainingCells; i++) {
+      daysGrid.push(
+        <div key={`empty-end-${i}`} className="h-24 border p-1 bg-gray-50"></div>
+      );
+    }
+    
+    // Create rows with 7 days each
+    const rows = [];
+    let cells = [];
+    
+    daysGrid.forEach((cell, i) => {
+      if (i % 7 !== 0) {
+        cells.push(cell);
+      } else {
+        rows.push(cells);
+        cells = [cell];
+      }
+      if (i === daysGrid.length - 1) {
+        rows.push(cells);
+      }
+    });
+    
+    // Skip the first empty array
+    const calendarRows = rows.slice(1).map((row, i) => (
+      <div key={i} className="grid grid-cols-7">
+        {row}
+      </div>
+    ));
+    
+    days.push(...calendarRows);
+    
+    return days;
+  };
+  
+  // Get events for the selected date
+  const selectedDateEvents = getEventsForDate(selectedDate);
+  
   return (
-    <div className="p-6">
-      <div className="flex justify-between items-center mb-6">
-        <h1 className="text-2xl font-bold">Community Events</h1>
-        <button className="bg-blue-600 text-white py-2 px-4 rounded-lg flex items-center">
-          <Calendar className="mr-2" size={16} />
+    <div className="container mx-auto px-4 py-6">
+      <div className="flex justify-between items-center mb-8">
+        <div>
+          <h1 className="text-3xl font-bold">Events</h1>
+          <p className="text-gray-600 mt-2">Browse and manage community events</p>
+        </div>
+        <button className="btn btn-primary">
+          <Plus size={18} className="mr-2" />
           Create Event
         </button>
       </div>
-
-      {/* Event filter */}
-      <div className="bg-white p-4 rounded-lg shadow-md mb-6">
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Event Type</label>
-            <select className="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500">
-              <option>All Events</option>
-              <option>Workshops</option>
-              <option>Meetups</option>
-              <option>Conferences</option>
-              <option>Social</option>
-            </select>
+      
+      <div className="bg-white rounded-xl shadow-md overflow-hidden mb-8">
+        <div className="p-4 border-b flex justify-between items-center">
+          <div className="flex space-x-2">
+            <button 
+              className={`px-3 py-1 rounded ${viewMode === 'month' ? 'bg-blue-100 text-blue-700' : 'text-gray-600 hover:bg-gray-100'}`}
+              onClick={() => setViewMode('month')}
+            >
+              Month
+            </button>
+            <button 
+              className={`px-3 py-1 rounded ${viewMode === 'list' ? 'bg-blue-100 text-blue-700' : 'text-gray-600 hover:bg-gray-100'}`}
+              onClick={() => setViewMode('list')}
+            >
+              List
+            </button>
           </div>
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Date</label>
-            <input 
-              type="date" 
-              className="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
-            />
+          
+          <div className="flex items-center">
+            <button onClick={prevMonth} className="p-2 hover:bg-gray-100 rounded-full">
+              <ChevronLeft size={20} />
+            </button>
+            <h2 className="text-xl font-bold px-4">
+              {format(currentMonth, 'MMMM yyyy')}
+            </h2>
+            <button onClick={nextMonth} className="p-2 hover:bg-gray-100 rounded-full">
+              <ChevronRight size={20} />
+            </button>
           </div>
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Location</label>
-            <select className="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500">
-              <option>All Locations</option>
-              <option>Community Center</option>
-              <option>Tech Hub</option>
-              <option>Community Park</option>
-              <option>Virtual</option>
-            </select>
-          </div>
-          <div className="flex items-end">
-            <button className="bg-blue-600 text-white py-2 px-4 rounded-lg w-full">
-              Apply Filters
+          
+          <div className="flex items-center">
+            <button className="flex items-center gap-2 px-3 py-1 text-gray-600 hover:bg-gray-100 rounded">
+              <Filter size={16} />
+              <span>Filter</span>
             </button>
           </div>
         </div>
-      </div>
-
-      {/* Events Grid */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-        {upcomingEvents.map(event => (
-          <div key={event.id} className="bg-white rounded-lg shadow-md overflow-hidden">
-            <img 
-              src={event.image} 
-              alt={event.title} 
-              className="w-full h-48 object-cover"
-            />
-            <div className="p-4">
-              <h3 className="text-xl font-semibold mb-2">{event.title}</h3>
-              <div className="space-y-2 mb-4">
-                <div className="flex items-center text-gray-600">
-                  <Calendar size={16} className="mr-2" />
-                  <span>{event.date}</span>
+        
+        {viewMode === 'month' ? (
+          <div className="p-4">
+            {renderCalendarDays()}
+          </div>
+        ) : (
+          <div className="p-4">
+            <div className="space-y-4">
+              {events.map(event => (
+                <div key={event.id} className="border rounded-lg p-4 hover:shadow-md transition-shadow">
+                  <div className="flex flex-wrap gap-4">
+                    <div className="flex flex-col items-center justify-center h-16 w-16 rounded-lg bg-blue-100 text-blue-800 shrink-0">
+                      <span className="text-sm font-medium">{format(event.date, 'MMM')}</span>
+                      <span className="text-2xl font-bold">{format(event.date, 'd')}</span>
+                    </div>
+                    
+                    <div className="flex-1">
+                      <h3 className="text-xl font-semibold">{event.title}</h3>
+                      <div className="mt-2 flex flex-col gap-1">
+                        <div className="flex items-center text-gray-600">
+                          <Clock size={16} className="mr-1" />
+                          <span>{format(event.date, 'h:mm a')}</span>
+                        </div>
+                        <div className="flex items-center text-gray-600">
+                          <MapPin size={16} className="mr-1" />
+                          <span>{event.location}</span>
+                        </div>
+                      </div>
+                    </div>
+                    
+                    <div className="flex items-start">
+                      <span className={`px-3 py-1 rounded-full text-sm font-medium ${
+                        event.type === 'meeting' ? 'bg-blue-100 text-blue-800' :
+                        event.type === 'social' ? 'bg-purple-100 text-purple-800' :
+                        'bg-green-100 text-green-800'
+                      }`}>
+                        {event.type.charAt(0).toUpperCase() + event.type.slice(1)}
+                      </span>
+                    </div>
+                  </div>
+                  
+                  <p className="mt-3 text-gray-600">{event.description}</p>
                 </div>
-                <div className="flex items-center text-gray-600">
-                  <Clock size={16} className="mr-2" />
-                  <span>{event.time}</span>
-                </div>
-                <div className="flex items-center text-gray-600">
-                  <MapPin size={16} className="mr-2" />
-                  <span>{event.location}</span>
-                </div>
-                <div className="flex items-center text-gray-600">
-                  <Users size={16} className="mr-2" />
-                  <span>{event.attendees} attendees</span>
-                </div>
-              </div>
-              <p className="text-gray-600 mb-4 line-clamp-2">{event.description}</p>
-              <div className="flex justify-between">
-                <button className="bg-blue-600 text-white py-2 px-4 rounded-lg">
-                  Register
-                </button>
-                <button className="border border-blue-600 text-blue-600 py-2 px-4 rounded-lg">
-                  Details
-                </button>
-              </div>
+              ))}
             </div>
           </div>
-        ))}
+        )}
       </div>
+      
+      {viewMode === 'month' && selectedDateEvents.length > 0 && (
+        <div className="bg-white rounded-xl shadow-md overflow-hidden">
+          <div className="p-4 border-b">
+            <h2 className="text-xl font-bold">Events on {format(selectedDate, 'MMMM d, yyyy')}</h2>
+          </div>
+          
+          <div className="p-4 space-y-4">
+            {selectedDateEvents.map(event => (
+              <div key={event.id} className="border rounded-lg p-4">
+                <h3 className="text-xl font-semibold">{event.title}</h3>
+                <div className="mt-2 flex items-center gap-4">
+                  <div className="flex items-center text-gray-600">
+                    <Clock size={16} className="mr-1" />
+                    <span>{format(event.date, 'h:mm a')}</span>
+                  </div>
+                  <div className="flex items-center text-gray-600">
+                    <MapPin size={16} className="mr-1" />
+                    <span>{event.location}</span>
+                  </div>
+                  <span className={`px-3 py-1 rounded-full text-sm font-medium ${
+                    event.type === 'meeting' ? 'bg-blue-100 text-blue-800' :
+                    event.type === 'social' ? 'bg-purple-100 text-purple-800' :
+                    'bg-green-100 text-green-800'
+                  }`}>
+                    {event.type.charAt(0).toUpperCase() + event.type.slice(1)}
+                  </span>
+                </div>
+                <p className="mt-3 text-gray-600">{event.description}</p>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
     </div>
   );
 };

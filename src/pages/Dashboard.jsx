@@ -1,119 +1,225 @@
-import React from 'react';
-import { Calendar, Users, Award, FileText } from 'lucide-react';
-
-const StatCard = ({ icon: Icon, title, value, change, changeType }) => {
-  return (
-    <div className="bg-white rounded-lg p-6 shadow-md">
-      <div className="flex items-center justify-between mb-4">
-        <h3 className="text-gray-500 font-medium">{title}</h3>
-        <div className="bg-blue-100 p-2 rounded-full">
-          <Icon size={20} className="text-blue-600" />
-        </div>
-      </div>
-      <div className="flex items-end justify-between">
-        <div>
-          <p className="text-3xl font-bold">{value}</p>
-          <p className={`text-sm ${changeType === 'positive' ? 'text-green-500' : 'text-red-500'}`}>
-            {changeType === 'positive' ? '↑' : '↓'} {change}
-          </p>
-        </div>
-      </div>
-    </div>
-  );
-};
+import React from "react";
+import { Calendar, Users, Eye, Radio, ArrowUp, ArrowDown } from "lucide-react";
+import Chart from "react-apexcharts";
 
 const Dashboard = () => {
-  const activities = [
-    { user: 'Jennifer Smith', action: 'posted a new resource', time: '2 hours ago' },
-    { user: 'Michael Johnson', action: 'registered for Community Meetup', time: '3 hours ago' },
-    { user: 'Emily Williams', action: 'commented on Discussion Thread', time: '5 hours ago' },
-    { user: 'David Brown', action: 'shared your post', time: 'Yesterday' },
-    { user: 'Sarah Miller', action: 'joined the community', time: 'Yesterday' },
+  // Sample data for charts
+  const communityActivityOptions = {
+    chart: {
+      toolbar: {
+        show: false,
+      },
+      zoom: {
+        enabled: false,
+      },
+    },
+    xaxis: {
+      categories: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'],
+      labels: {
+        style: {
+          colors: '#64748b',
+        },
+      },
+    },
+    yaxis: {
+      labels: {
+        style: {
+          colors: '#64748b',
+        },
+      },
+    },
+    colors: ['#3b82f6', '#8b5cf6'],
+    legend: {
+      position: 'top',
+    },
+    stroke: {
+      curve: 'smooth',
+      width: 3,
+    },
+    grid: {
+      borderColor: '#e2e8f0',
+      strokeDashArray: 5,
+    },
+    markers: {
+      size: 5,
+      hover: {
+        size: 7,
+      },
+    },
+  };
+
+  const communityActivitySeries = [
+    {
+      name: 'Posts',
+      data: [12, 9, 15, 10, 14, 17, 8],
+    },
+    {
+      name: 'Events',
+      data: [2, 3, 1, 4, 2, 5, 1],
+    },
   ];
 
-  const upcomingEvents = [
-    { id: 1, name: 'Community Meetup', date: 'May 15, 2023', time: '6:00 PM', attendees: 24 },
-    { id: 2, name: 'Workshop: Introduction to React', date: 'May 20, 2023', time: '3:00 PM', attendees: 45 },
-    { id: 3, name: 'Networking Event', date: 'May 25, 2023', time: '5:30 PM', attendees: 32 },
+  const memberDistributionOptions = {
+    chart: {
+      toolbar: {
+        show: false,
+      },
+    },
+    labels: ['Residents', 'Staff', 'Guests', 'Committee Members'],
+    colors: ['#3b82f6', '#8b5cf6', '#ec4899', '#10b981'],
+    legend: {
+      position: 'bottom',
+    },
+    dataLabels: {
+      enabled: false,
+    },
+    plotOptions: {
+      pie: {
+        donut: {
+          size: '65%',
+        },
+      },
+    },
+  };
+
+  const memberDistributionSeries = [125, 20, 18, 15];
+
+  // Stats data
+  const statsData = [
+    {
+      title: "Total Members",
+      value: "178",
+      icon: Users,
+      change: "+12%",
+      increase: true
+    },
+    {
+      title: "Active Posts",
+      value: "543",
+      icon: Radio,
+      change: "+18%",
+      increase: true
+    },
+    {
+      title: "Page Views",
+      value: "1,247",
+      icon: Eye,
+      change: "-3%",
+      increase: false
+    },
+    {
+      title: "Upcoming Events",
+      value: "8",
+      icon: Calendar,
+      change: "+5%",
+      increase: true
+    }
   ];
 
   return (
-    <div className="p-6">
-      <h1 className="text-2xl font-bold mb-6">Dashboard</h1>
-      
-      {/* Stats Grid */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-        <StatCard 
-          icon={Users} 
-          title="Total Members" 
-          value="2,543" 
-          change="12% this month"
-          changeType="positive" 
-        />
-        <StatCard 
-          icon={Calendar} 
-          title="Active Events" 
-          value="12" 
-          change="3 more than last month"
-          changeType="positive" 
-        />
-        <StatCard 
-          icon={FileText} 
-          title="Resources" 
-          value="87" 
-          change="5 new this week"
-          changeType="positive" 
-        />
-        <StatCard 
-          icon={Award} 
-          title="Engagement" 
-          value="76%" 
-          change="2% from last week"
-          changeType="negative" 
-        />
+    <div className="container mx-auto px-4 py-6">
+      <div className="mb-8">
+        <h1 className="text-3xl font-bold">Dashboard</h1>
+        <p className="text-gray-600 mt-2">Overview of community activity and metrics</p>
       </div>
       
-      {/* Two-column layout for activities and events */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-        {/* Recent Activities */}
-        <div className="bg-white rounded-lg shadow-md p-6">
-          <h2 className="text-xl font-semibold mb-4">Recent Activities</h2>
-          <div className="space-y-4">
-            {activities.map((activity, index) => (
-              <div key={index} className="flex items-start border-b border-gray-100 pb-3">
-                <div className="bg-blue-100 rounded-full p-2 mr-3">
-                  <Users size={16} className="text-blue-600" />
-                </div>
+      {/* Stats Cards */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+        {statsData.map((stat, index) => {
+          const Icon = stat.icon;
+          return (
+            <div key={index} className="card p-6">
+              <div className="flex justify-between items-start">
                 <div>
-                  <p className="font-medium">{activity.user} <span className="font-normal text-gray-600">{activity.action}</span></p>
-                  <p className="text-sm text-gray-500">{activity.time}</p>
+                  <h3 className="text-gray-500 font-medium">{stat.title}</h3>
+                  <p className="text-3xl font-bold mt-1">{stat.value}</p>
+                </div>
+                <div className="h-12 w-12 rounded-full bg-blue-100 flex items-center justify-center text-blue-600">
+                  <Icon size={24} />
                 </div>
               </div>
-            ))}
-          </div>
-          <button className="mt-4 text-blue-600 font-medium">View all activities</button>
+              <div className={`flex items-center mt-4 text-sm ${stat.increase ? 'text-green-600' : 'text-red-600'}`}>
+                {stat.increase ? <ArrowUp size={16} /> : <ArrowDown size={16} />}
+                <span className="ml-1">{stat.change} from last month</span>
+              </div>
+            </div>
+          );
+        })}
+      </div>
+      
+      {/* Charts */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-8">
+        <div className="card p-6">
+          <h2 className="text-xl font-bold mb-6">Community Activity</h2>
+          <Chart 
+            options={communityActivityOptions}
+            series={communityActivitySeries}
+            type="line"
+            height={350}
+          />
         </div>
         
-        {/* Upcoming Events */}
-        <div className="bg-white rounded-lg shadow-md p-6">
-          <h2 className="text-xl font-semibold mb-4">Upcoming Events</h2>
-          <div className="space-y-4">
-            {upcomingEvents.map(event => (
-              <div key={event.id} className="flex items-start border-b border-gray-100 pb-3">
-                <div className="bg-blue-100 rounded-full p-2 mr-3">
-                  <Calendar size={16} className="text-blue-600" />
-                </div>
-                <div className="flex-1">
-                  <div className="flex justify-between">
-                    <p className="font-medium">{event.name}</p>
-                    <p className="text-sm bg-blue-100 text-blue-600 rounded-full px-2 py-1">{event.attendees} attending</p>
-                  </div>
-                  <p className="text-sm text-gray-500">{event.date} at {event.time}</p>
-                </div>
-              </div>
-            ))}
-          </div>
-          <button className="mt-4 text-blue-600 font-medium">View all events</button>
+        <div className="card p-6">
+          <h2 className="text-xl font-bold mb-6">Member Distribution</h2>
+          <Chart 
+            options={memberDistributionOptions}
+            series={memberDistributionSeries}
+            type="donut"
+            height={350}
+          />
+        </div>
+      </div>
+      
+      {/* Recent Activity */}
+      <div className="card p-6">
+        <h2 className="text-xl font-bold mb-6">Recent Activities</h2>
+        <div className="overflow-x-auto">
+          <table className="w-full min-w-full">
+            <thead>
+              <tr className="border-b">
+                <th className="text-left py-3 px-4 font-semibold text-gray-700">Activity</th>
+                <th className="text-left py-3 px-4 font-semibold text-gray-700">Member</th>
+                <th className="text-left py-3 px-4 font-semibold text-gray-700">Type</th>
+                <th className="text-left py-3 px-4 font-semibold text-gray-700">Date</th>
+                <th className="text-right py-3 px-4 font-semibold text-gray-700">Status</th>
+              </tr>
+            </thead>
+            <tbody className="divide-y">
+              {[
+                { activity: "New post created", member: "John Doe", type: "Post", date: "Today, 10:30 AM", status: "Active" },
+                { activity: "Event announcement", member: "Sarah Johnson", type: "Event", date: "Yesterday, 2:15 PM", status: "Active" },
+                { activity: "Resource updated", member: "Mike Brown", type: "Resource", date: "Jun 15, 2023", status: "Active" },
+                { activity: "Maintenance request", member: "Emma Wilson", type: "Maintenance", date: "Jun 14, 2023", status: "Resolved" },
+                { activity: "Community poll created", member: "Robert Clark", type: "Poll", date: "Jun 12, 2023", status: "Closed" },
+              ].map((item, index) => (
+                <tr key={index}>
+                  <td className="py-3 px-4">{item.activity}</td>
+                  <td className="py-3 px-4">{item.member}</td>
+                  <td className="py-3 px-4">
+                    <span className={`inline-block px-2 py-1 rounded-full text-xs font-medium ${
+                      item.type === 'Post' ? 'bg-blue-100 text-blue-700' :
+                      item.type === 'Event' ? 'bg-purple-100 text-purple-700' : 
+                      item.type === 'Resource' ? 'bg-amber-100 text-amber-700' :
+                      item.type === 'Maintenance' ? 'bg-green-100 text-green-700' :
+                      'bg-gray-100 text-gray-700'
+                    }`}>
+                      {item.type}
+                    </span>
+                  </td>
+                  <td className="py-3 px-4">{item.date}</td>
+                  <td className="py-3 px-4 text-right">
+                    <span className={`inline-block px-2 py-1 rounded-full text-xs font-medium ${
+                      item.status === 'Active' ? 'bg-green-100 text-green-700' :
+                      item.status === 'Resolved' ? 'bg-blue-100 text-blue-700' :
+                      'bg-gray-100 text-gray-700'
+                    }`}>
+                      {item.status}
+                    </span>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
         </div>
       </div>
     </div>

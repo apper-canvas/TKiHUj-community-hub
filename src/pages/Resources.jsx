@@ -1,177 +1,324 @@
-import React from 'react';
-import { FileText, Download, Search, Book, Video, Link, Filter } from 'lucide-react';
+import React, { useState } from "react";
+import { FileText, Download, Link as LinkIcon, ExternalLink, Search, Plus, Filter, ChevronDown } from "lucide-react";
 
 const Resources = () => {
+  const [searchQuery, setSearchQuery] = useState("");
+  const [selectedCategory, setSelectedCategory] = useState("All");
+  const [sortOrder, setSortOrder] = useState("newest");
+  
+  // Sample resources data
   const resources = [
     {
       id: 1,
-      title: 'Community Guidelines',
-      description: 'Learn about our community rules and expectations for all members.',
-      type: 'Document',
-      author: 'Admin Team',
-      dateAdded: 'April 15, 2023',
-      downloads: 342,
-      icon: FileText
+      title: "Community Guidelines",
+      description: "Official guidelines for all community members to follow for a harmonious living environment.",
+      type: "document",
+      fileType: "pdf",
+      fileSize: "1.2 MB",
+      category: "Rules",
+      date: "2023-06-01",
+      featured: true,
     },
     {
       id: 2,
-      title: 'Getting Started Guide',
-      description: 'A comprehensive guide to help new members navigate the community.',
-      type: 'Document',
-      author: 'Onboarding Team',
-      dateAdded: 'March 22, 2023',
-      downloads: 567,
-      icon: Book
+      title: "Maintenance Request Form",
+      description: "Form to submit maintenance requests for common areas or community facilities.",
+      type: "document",
+      fileType: "docx",
+      fileSize: "458 KB",
+      category: "Forms",
+      date: "2023-05-15",
+      featured: false,
     },
     {
       id: 3,
-      title: 'Introduction to React Workshop Recording',
-      description: 'Recording of our popular React workshop for beginners.',
-      type: 'Video',
-      author: 'Sarah Johnson',
-      dateAdded: 'May 2, 2023',
-      downloads: 189,
-      icon: Video
+      title: "Emergency Contact List",
+      description: "List of emergency contacts including local authorities and community representatives.",
+      type: "document",
+      fileType: "pdf",
+      fileSize: "785 KB",
+      category: "Emergency",
+      date: "2023-04-22",
+      featured: true,
     },
     {
       id: 4,
-      title: 'Best Practices for Remote Collaboration',
-      description: 'Learn effective strategies for working with remote teams.',
-      type: 'Document',
-      author: 'Michael Chen',
-      dateAdded: 'April 5, 2023',
-      downloads: 231,
-      icon: FileText
+      title: "Community Calendar",
+      description: "Calendar of all upcoming community events, meetings, and important dates.",
+      type: "link",
+      url: "https://calendar.example.com",
+      category: "Events",
+      date: "2023-06-10",
+      featured: false,
     },
     {
       id: 5,
-      title: 'Community Survey Results 2023',
-      description: 'Detailed analysis of our annual community survey.',
-      type: 'Document',
-      author: 'Research Team',
-      dateAdded: 'May 10, 2023',
-      downloads: 127,
-      icon: FileText
+      title: "Neighborhood Map",
+      description: "Detailed map of the community showing important locations and facilities.",
+      type: "document",
+      fileType: "jpg",
+      fileSize: "3.5 MB",
+      category: "Maps",
+      date: "2023-03-18",
+      featured: false,
     },
     {
       id: 6,
-      title: 'Useful External Resources',
-      description: 'A curated list of helpful external websites, tools, and learning resources.',
-      type: 'Link Collection',
-      author: 'Education Team',
-      dateAdded: 'April 29, 2023',
-      downloads: 205,
-      icon: Link
+      title: "Community Newsletter - June 2023",
+      description: "Monthly newsletter with updates, announcements, and featured community members.",
+      type: "document",
+      fileType: "pdf",
+      fileSize: "2.1 MB",
+      category: "Newsletter",
+      date: "2023-06-05",
+      featured: true,
+    },
+    {
+      id: 7,
+      title: "Local Services Directory",
+      description: "Directory of local businesses, services, and amenities near the community.",
+      type: "link",
+      url: "https://directory.example.com",
+      category: "Services",
+      date: "2023-05-27",
+      featured: false,
+    },
+    {
+      id: 8,
+      title: "Board Meeting Minutes - May 2023",
+      description: "Official minutes from the last community board meeting.",
+      type: "document",
+      fileType: "pdf",
+      fileSize: "950 KB",
+      category: "Meeting Minutes",
+      date: "2023-05-20",
+      featured: false,
     },
   ];
-
-  const categories = [
-    { name: 'All Resources', count: 42 },
-    { name: 'Documents', count: 23 },
-    { name: 'Videos', count: 8 },
-    { name: 'Templates', count: 5 },
-    { name: 'Presentations', count: 4 },
-    { name: 'Link Collections', count: 2 },
-  ];
-
+  
+  // Get all unique categories
+  const categories = ["All", ...new Set(resources.map(resource => resource.category))];
+  
+  // Filter resources based on search query and selected category
+  const filteredResources = resources.filter(resource => {
+    const matchesSearch = resource.title.toLowerCase().includes(searchQuery.toLowerCase()) || 
+                        resource.description.toLowerCase().includes(searchQuery.toLowerCase());
+    const matchesCategory = selectedCategory === "All" || resource.category === selectedCategory;
+    return matchesSearch && matchesCategory;
+  });
+  
+  // Sort resources
+  const sortedResources = [...filteredResources].sort((a, b) => {
+    if (sortOrder === "newest") {
+      return new Date(b.date) - new Date(a.date);
+    } else if (sortOrder === "oldest") {
+      return new Date(a.date) - new Date(b.date);
+    } else if (sortOrder === "a-z") {
+      return a.title.localeCompare(b.title);
+    } else {
+      return b.title.localeCompare(a.title);
+    }
+  });
+  
+  // Featured resources
+  const featuredResources = resources.filter(resource => resource.featured);
+  
   return (
-    <div className="p-6">
-      <div className="flex justify-between items-center mb-6">
-        <h1 className="text-2xl font-bold">Resource Library</h1>
-        <button className="bg-blue-600 text-white py-2 px-4 rounded-lg flex items-center">
-          <FileText className="mr-2" size={16} />
-          Upload Resource
+    <div className="container mx-auto px-4 py-6">
+      <div className="flex justify-between items-center mb-8">
+        <div>
+          <h1 className="text-3xl font-bold">Resources</h1>
+          <p className="text-gray-600 mt-2">Access and download community resources</p>
+        </div>
+        <button className="btn btn-primary">
+          <Plus size={18} className="mr-2" />
+          Add Resource
         </button>
       </div>
-
-      <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
-        {/* Sidebar with filters */}
-        <div className="lg:col-span-1">
-          <div className="bg-white rounded-lg shadow-md p-4 mb-6">
-            <div className="relative">
-              <input
-                type="text"
-                placeholder="Search resources..."
-                className="w-full border border-gray-300 rounded-md pl-10 pr-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
-              />
-              <Search className="absolute left-3 top-2.5 text-gray-400" size={18} />
+      
+      {/* Featured Resources */}
+      {featuredResources.length > 0 && (
+        <div className="mb-8">
+          <h2 className="text-xl font-bold mb-4">Featured Resources</h2>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+            {featuredResources.map(resource => (
+              <div key={resource.id} className="card hover:shadow-md transition-shadow">
+                <div className="p-6">
+                  <div className="flex items-start justify-between mb-4">
+                    <div className={`h-12 w-12 rounded-lg flex items-center justify-center ${
+                      resource.type === 'document' ? 'bg-blue-100 text-blue-700' : 'bg-green-100 text-green-700'
+                    }`}>
+                      {resource.type === 'document' ? (
+                        <FileText size={24} />
+                      ) : (
+                        <LinkIcon size={24} />
+                      )}
+                    </div>
+                    <div className="px-3 py-1 rounded-full bg-blue-100 text-blue-700 text-xs font-medium">
+                      {resource.category}
+                    </div>
+                  </div>
+                  <h3 className="text-lg font-bold mb-2">{resource.title}</h3>
+                  <p className="text-gray-600 mb-4">{resource.description}</p>
+                  <div className="flex justify-between items-center">
+                    {resource.type === 'document' ? (
+                      <div className="text-sm text-gray-500">
+                        {resource.fileType.toUpperCase()} • {resource.fileSize}
+                      </div>
+                    ) : (
+                      <div className="text-sm text-gray-500">External Link</div>
+                    )}
+                    <button className={`btn px-3 py-1 flex items-center gap-1 ${
+                      resource.type === 'document' ? 'btn-primary' : 'btn-secondary'
+                    }`}>
+                      {resource.type === 'document' ? (
+                        <>
+                          <Download size={16} />
+                          <span>Download</span>
+                        </>
+                      ) : (
+                        <>
+                          <ExternalLink size={16} />
+                          <span>Open</span>
+                        </>
+                      )}
+                    </button>
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+      
+      {/* Search and Filter */}
+      <div className="bg-white rounded-xl shadow-md p-4 mb-6 flex flex-col md:flex-row gap-4">
+        <div className="relative flex-1">
+          <Search size={18} className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
+          <input
+            type="text"
+            placeholder="Search resources..."
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            className="input pl-10"
+          />
+        </div>
+        
+        <div className="flex gap-4">
+          <div className="relative">
+            <button className="btn btn-outline flex items-center gap-2 w-48">
+              <Filter size={16} />
+              <span>Category: {selectedCategory}</span>
+              <ChevronDown size={16} className="ml-auto" />
+            </button>
+            <div className="absolute top-full left-0 right-0 mt-1 bg-white border rounded-lg shadow-lg z-10 hidden group-focus-within:block">
+              {categories.map(category => (
+                <button
+                  key={category}
+                  className="block w-full text-left px-4 py-2 hover:bg-gray-100"
+                  onClick={() => setSelectedCategory(category)}
+                >
+                  {category}
+                </button>
+              ))}
             </div>
           </div>
-
-          <div className="bg-white rounded-lg shadow-md p-4">
-            <h2 className="font-semibold text-lg mb-4 flex items-center">
-              <Filter size={16} className="mr-2" />
-              Categories
-            </h2>
-            <ul className="space-y-2">
-              {categories.map((category) => (
-                <li key={category.name} className="flex justify-between items-center">
-                  <button className="text-gray-700 hover:text-blue-600 focus:outline-none">
-                    {category.name}
-                  </button>
-                  <span className="bg-gray-100 text-gray-600 px-2 py-1 rounded-full text-xs">
-                    {category.count}
-                  </span>
-                </li>
+          
+          <div className="relative">
+            <button className="btn btn-outline flex items-center gap-2 w-48">
+              <span>Sort: {sortOrder === 'newest' ? 'Newest First' : 
+                         sortOrder === 'oldest' ? 'Oldest First' : 
+                         sortOrder === 'a-z' ? 'A to Z' : 'Z to A'}</span>
+              <ChevronDown size={16} className="ml-auto" />
+            </button>
+            <div className="absolute top-full left-0 right-0 mt-1 bg-white border rounded-lg shadow-lg z-10 hidden group-focus-within:block">
+              {[
+                { value: 'newest', label: 'Newest First' },
+                { value: 'oldest', label: 'Oldest First' },
+                { value: 'a-z', label: 'A to Z' },
+                { value: 'z-a', label: 'Z to A' },
+              ].map(option => (
+                <button
+                  key={option.value}
+                  className="block w-full text-left px-4 py-2 hover:bg-gray-100"
+                  onClick={() => setSortOrder(option.value)}
+                >
+                  {option.label}
+                </button>
               ))}
-            </ul>
-
-            <div className="mt-6 pt-6 border-t border-gray-200">
-              <h2 className="font-semibold text-lg mb-4">Date Added</h2>
-              <div className="space-y-2">
-                <label className="flex items-center">
-                  <input type="radio" name="date" className="mr-2" />
-                  <span>Last 7 days</span>
-                </label>
-                <label className="flex items-center">
-                  <input type="radio" name="date" className="mr-2" />
-                  <span>Last 30 days</span>
-                </label>
-                <label className="flex items-center">
-                  <input type="radio" name="date" className="mr-2" />
-                  <span>Last 90 days</span>
-                </label>
-                <label className="flex items-center">
-                  <input type="radio" name="date" className="mr-2" defaultChecked />
-                  <span>All time</span>
-                </label>
-              </div>
             </div>
           </div>
         </div>
-
-        {/* Main content */}
-        <div className="lg:col-span-3">
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 gap-6">
-            {resources.map((resource) => {
-              const ResourceIcon = resource.icon;
-              return (
-                <div key={resource.id} className="bg-white rounded-lg shadow-md p-5">
-                  <div className="flex items-start">
-                    <div className="bg-blue-100 p-3 rounded-lg mr-4">
-                      <ResourceIcon size={24} className="text-blue-600" />
+      </div>
+      
+      {/* Resource List */}
+      <div className="bg-white rounded-xl shadow-md overflow-hidden">
+        <div className="p-4 border-b">
+          <h2 className="text-xl font-bold">All Resources</h2>
+        </div>
+        
+        <div className="divide-y">
+          {sortedResources.length > 0 ? (
+            sortedResources.map(resource => (
+              <div key={resource.id} className="p-4 hover:bg-gray-50 transition-colors">
+                <div className="flex flex-wrap gap-4">
+                  <div className={`h-12 w-12 rounded-lg flex items-center justify-center shrink-0 ${
+                    resource.type === 'document' ? 'bg-blue-100 text-blue-700' : 'bg-green-100 text-green-700'
+                  }`}>
+                    {resource.type === 'document' ? (
+                      <FileText size={24} />
+                    ) : (
+                      <LinkIcon size={24} />
+                    )}
+                  </div>
+                  
+                  <div className="flex-1 min-w-0">
+                    <div className="flex items-center gap-2">
+                      <h3 className="font-bold">{resource.title}</h3>
+                      <span className="px-2 py-0.5 rounded-full bg-blue-100 text-blue-700 text-xs font-medium">
+                        {resource.category}
+                      </span>
                     </div>
-                    <div className="flex-1">
-                      <div className="flex justify-between">
-                        <h3 className="font-semibold text-lg">{resource.title}</h3>
-                      </div>
-                      <p className="text-sm text-gray-500 mb-2">
-                        {resource.type} • Added {resource.dateAdded}
-                      </p>
-                      <p className="text-gray-600 mb-3 line-clamp-2">{resource.description}</p>
-                      <div className="flex justify-between items-center">
-                        <span className="text-sm text-gray-500">By {resource.author}</span>
-                        <button className="flex items-center text-blue-600 hover:text-blue-800">
-                          <Download size={16} className="mr-1" />
-                          <span className="text-sm">{resource.downloads}</span>
-                        </button>
-                      </div>
+                    <p className="text-gray-600 mt-1">{resource.description}</p>
+                    <div className="mt-2 text-sm text-gray-500">
+                      {new Date(resource.date).toLocaleDateString('en-US', { 
+                        year: 'numeric', 
+                        month: 'long', 
+                        day: 'numeric' 
+                      })}
+                      {resource.type === 'document' && ` • ${resource.fileType.toUpperCase()} • ${resource.fileSize}`}
                     </div>
                   </div>
+                  
+                  <div className="flex items-center">
+                    <button className={`btn px-3 py-1 flex items-center gap-1 ${
+                      resource.type === 'document' ? 'btn-primary' : 'btn-secondary'
+                    }`}>
+                      {resource.type === 'document' ? (
+                        <>
+                          <Download size={16} />
+                          <span>Download</span>
+                        </>
+                      ) : (
+                        <>
+                          <ExternalLink size={16} />
+                          <span>Open</span>
+                        </>
+                      )}
+                    </button>
+                  </div>
                 </div>
-              );
-            })}
-          </div>
+              </div>
+            ))
+          ) : (
+            <div className="p-8 text-center">
+              <div className="text-gray-400 mb-3">
+                <Search size={48} className="mx-auto" />
+              </div>
+              <h3 className="text-xl font-medium mb-1">No resources found</h3>
+              <p className="text-gray-500">Try adjusting your search or filter criteria</p>
+            </div>
+          )}
         </div>
       </div>
     </div>
