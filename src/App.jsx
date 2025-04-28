@@ -1,167 +1,166 @@
 import React, { useState, useEffect } from "react";
 import { BrowserRouter as Router, Routes, Route, Link, useLocation } from "react-router-dom";
 import { Sun, Moon, Menu, X, Bell, Calendar, Tool, User, LogOut } from "lucide-react";
-import { HomeIcon } from "lucide-react"; // Renamed Home to HomeIcon to avoid conflict
 import { motion, AnimatePresence } from "framer-motion";
-
-// Import your page components here
 import Home from "./pages/Home";
 import Dashboard from "./pages/Dashboard";
 import Events from "./pages/Events";
 import Resources from "./pages/Resources";
-import Profile from "./pages/Profile";
 
-function App() {
-  const [isDarkMode, setIsDarkMode] = useState(false);
-  const [isSidebarOpen, setIsSidebarOpen] = useState(false);
-
-  useEffect(() => {
-    if (isDarkMode) {
-      document.documentElement.classList.add('dark');
-    } else {
-      document.documentElement.classList.remove('dark');
-    }
-  }, [isDarkMode]);
-
-  const toggleDarkMode = () => {
-    setIsDarkMode(!isDarkMode);
-  };
-
-  const toggleSidebar = () => {
-    setIsSidebarOpen(!isSidebarOpen);
-  };
-
-  const navItems = [
-    { name: "Home", path: "/", icon: <HomeIcon size={20} /> },
-    { name: "Dashboard", path: "/dashboard", icon: <Bell size={20} /> },
-    { name: "Events", path: "/events", icon: <Calendar size={20} /> },
-    { name: "Resources", path: "/resources", icon: <Tool size={20} /> },
-    { name: "Profile", path: "/profile", icon: <User size={20} /> },
+const Sidebar = ({ isOpen, toggleSidebar }) => {
+  const location = useLocation();
+  
+  const menuItems = [
+    { icon: User, text: "Home", path: "/" },
+    { icon: Calendar, text: "Dashboard", path: "/dashboard" },
+    { icon: Calendar, text: "Events", path: "/events" },
+    { icon: Tool, text: "Resources", path: "/resources" },
   ];
 
   return (
+    <>
+      {/* Mobile sidebar backdrop */}
+      <AnimatePresence>
+        {isOpen && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 0.5 }}
+            exit={{ opacity: 0 }}
+            className="md:hidden fixed inset-0 bg-black z-10"
+            onClick={toggleSidebar}
+          />
+        )}
+      </AnimatePresence>
+
+      {/* Sidebar */}
+      <motion.div
+        className={`fixed top-0 bottom-0 left-0 z-20 w-64 bg-white shadow-lg transform ${
+          isOpen ? "translate-x-0" : "-translate-x-full"
+        } md:translate-x-0 transition-transform duration-300 ease-in-out`}
+      >
+        <div className="p-4 flex justify-between items-center border-b">
+          <h1 className="text-2xl font-bold text-blue-600">Community Hub</h1>
+          <button 
+            onClick={toggleSidebar} 
+            className="md:hidden p-2 rounded-md hover:bg-gray-100"
+          >
+            <X size={20} />
+          </button>
+        </div>
+
+        <div className="py-4">
+          {menuItems.map((item, index) => {
+            const Icon = item.icon;
+            const isActive = location.pathname === item.path;
+            
+            return (
+              <Link 
+                key={index} 
+                to={item.path}
+                className={`flex items-center px-4 py-3 text-gray-700 ${
+                  isActive ? "bg-blue-50 text-blue-600 border-r-4 border-blue-600" : "hover:bg-gray-100"
+                }`}
+                onClick={() => toggleSidebar()}
+              >
+                <Icon size={20} className="mr-3" />
+                <span>{item.text}</span>
+              </Link>
+            );
+          })}
+        </div>
+
+        <div className="absolute bottom-0 left-0 right-0 p-4 border-t">
+          <button className="flex items-center px-4 py-3 text-gray-700 hover:bg-gray-100 rounded-md w-full">
+            <LogOut size={20} className="mr-3" />
+            <span>Logout</span>
+          </button>
+        </div>
+      </motion.div>
+    </>
+  );
+};
+
+const Header = ({ toggleSidebar, toggleDarkMode, darkMode }) => {
+  return (
+    <header className="bg-white shadow-sm sticky top-0 z-10">
+      <div className="flex items-center justify-between p-4">
+        <div className="flex items-center">
+          <button
+            onClick={toggleSidebar}
+            className="p-2 rounded-md hover:bg-gray-100 md:hidden"
+          >
+            <Menu size={20} />
+          </button>
+        </div>
+
+        <div className="flex items-center space-x-2">
+          <button
+            onClick={toggleDarkMode}
+            className="p-2 rounded-full hover:bg-gray-100"
+          >
+            {darkMode ? <Sun size={20} /> : <Moon size={20} />}
+          </button>
+          <button className="p-2 rounded-full hover:bg-gray-100 relative">
+            <Bell size={20} />
+            <span className="absolute top-0 right-0 h-4 w-4 bg-red-500 rounded-full text-xs text-white flex items-center justify-center">
+              3
+            </span>
+          </button>
+          <button className="flex items-center space-x-2 focus:outline-none">
+            <div className="h-8 w-8 rounded-full bg-blue-500 flex items-center justify-center text-white">
+              JS
+            </div>
+          </button>
+        </div>
+      </div>
+    </header>
+  );
+};
+
+const App = () => {
+  const [darkMode, setDarkMode] = useState(false);
+  const [sidebarOpen, setSidebarOpen] = useState(false);
+
+  const toggleDarkMode = () => {
+    setDarkMode(!darkMode);
+  };
+
+  const toggleSidebar = () => {
+    setSidebarOpen(!sidebarOpen);
+  };
+
+  useEffect(() => {
+    if (darkMode) {
+      document.documentElement.classList.add("dark");
+    } else {
+      document.documentElement.classList.remove("dark");
+    }
+  }, [darkMode]);
+
+  return (
     <Router>
-      <div className="min-h-screen font-sans bg-gray-50 dark:bg-gray-900 text-gray-900 dark:text-white transition-colors duration-300">
-        <header className="shadow-md dark:shadow-gray-800 bg-white dark:bg-gray-800">
-          <div className="container mx-auto px-4 py-3 flex justify-between items-center">
-            <div className="flex items-center gap-2">
-              <button
-                onClick={toggleSidebar}
-                className="lg:hidden p-2 rounded-full hover:bg-gray-100 dark:hover:bg-gray-700"
-              >
-                {isSidebarOpen ? <X size={24} /> : <Menu size={24} />}
-              </button>
-              <h1 className="text-xl font-bold">Community Hub</h1>
-            </div>
-            <div className="flex items-center gap-4">
-              <button
-                onClick={toggleDarkMode}
-                className="p-2 rounded-full hover:bg-gray-100 dark:hover:bg-gray-700"
-              >
-                {isDarkMode ? <Sun size={24} /> : <Moon size={24} />}
-              </button>
-              <div className="h-8 w-8 rounded-full bg-indigo-500 flex items-center justify-center text-white font-bold">
-                J
-              </div>
-            </div>
-          </div>
-        </header>
-
-        <div className="container mx-auto px-4 pt-6 flex">
-          {/* Sidebar for mobile - overlay */}
-          <AnimatePresence>
-            {isSidebarOpen && (
-              <motion.div 
-                className="fixed inset-0 bg-black bg-opacity-50 z-40 lg:hidden"
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                exit={{ opacity: 0 }}
-                onClick={toggleSidebar}
-              >
-                <motion.div
-                  className="absolute left-0 top-0 bottom-0 w-64 bg-white dark:bg-gray-800 shadow-lg pt-20"
-                  initial={{ x: -300 }}
-                  animate={{ x: 0 }}
-                  exit={{ x: -300 }}
-                  transition={{ type: "spring", stiffness: 300, damping: 30 }}
-                  onClick={(e) => e.stopPropagation()}
-                >
-                  <nav className="px-4">
-                    <NavLinks 
-                      navItems={navItems} 
-                      closeSidebar={() => setIsSidebarOpen(false)} 
-                    />
-                    <div className="mt-auto pt-6 border-t border-gray-200 dark:border-gray-700">
-                      <Link 
-                        to="/logout" 
-                        className="flex items-center gap-4 p-3 text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg"
-                        onClick={() => setIsSidebarOpen(false)}
-                      >
-                        <LogOut size={20} />
-                        <span>Logout</span>
-                      </Link>
-                    </div>
-                  </nav>
-                </motion.div>
-              </motion.div>
-            )}
-          </AnimatePresence>
-
-          {/* Sidebar for desktop - persistent */}
-          <div className="hidden lg:block w-64 flex-shrink-0">
-            <div className="sticky top-6 pr-4">
-              <nav>
-                <NavLinks navItems={navItems} />
-                <div className="mt-auto pt-6 border-t border-gray-200 dark:border-gray-700">
-                  <Link to="/logout" className="flex items-center gap-4 p-3 text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg">
-                    <LogOut size={20} />
-                    <span>Logout</span>
-                  </Link>
-                </div>
-              </nav>
-            </div>
-          </div>
-
-          {/* Main content */}
-          <main className="flex-1 pb-12">
+      <div className={`flex ${darkMode ? "dark" : ""}`}>
+        <Sidebar isOpen={sidebarOpen} toggleSidebar={toggleSidebar} />
+        
+        <div className="flex-1 md:ml-64 bg-gray-50 min-h-screen flex flex-col">
+          <Header 
+            toggleSidebar={toggleSidebar} 
+            toggleDarkMode={toggleDarkMode} 
+            darkMode={darkMode} 
+          />
+          
+          <main className="flex-1">
             <Routes>
               <Route path="/" element={<Home />} />
               <Route path="/dashboard" element={<Dashboard />} />
               <Route path="/events" element={<Events />} />
               <Route path="/resources" element={<Resources />} />
-              <Route path="/profile" element={<Profile />} />
             </Routes>
           </main>
         </div>
       </div>
     </Router>
   );
-}
-
-// Navigation links component
-function NavLinks({ navItems, closeSidebar }) {
-  const location = useLocation();
-  
-  return (
-    <ul className="space-y-2">
-      {navItems.map((item) => (
-        <li key={item.path}>
-          <Link
-            to={item.path}
-            className={`flex items-center gap-4 p-3 rounded-lg transition-colors ${
-              location.pathname === item.path
-                ? "bg-indigo-50 dark:bg-indigo-900/20 text-indigo-600 dark:text-indigo-400"
-                : "hover:bg-gray-100 dark:hover:bg-gray-700"
-            }`}
-            onClick={closeSidebar}
-          >
-            {item.icon}
-            <span>{item.name}</span>
-          </Link>
-        </li>
-      ))}
-    </ul>
-  );
-}
+};
 
 export default App;

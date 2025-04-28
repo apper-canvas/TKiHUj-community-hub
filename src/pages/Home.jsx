@@ -1,278 +1,211 @@
-import { useState } from "react";
-import { motion } from "framer-motion";
-import { MessageSquare, Heart, Share2, Bell, Calendar, Tool, AlertTriangle } from "lucide-react";
-import MainFeature from "../components/MainFeature";
+import React from 'react';
+import { ArrowRight, Calendar, FileText, MessageSquare, Users } from 'lucide-react';
 
 const Home = () => {
-  const [activeTab, setActiveTab] = useState("feed");
-  
-  // Sample data for posts
-  const [posts, setPosts] = useState([
+  const announcements = [
     {
       id: 1,
-      author: "Jane Cooper",
-      role: "Resident",
-      avatar: "JC",
-      content: "Just moved in to Block C! Looking forward to meeting everyone at the community BBQ this weekend.",
-      timestamp: "2 hours ago",
-      likes: 12,
-      comments: 5,
-      isLiked: false,
-      type: "personal"
+      title: 'Community Update: New Features Released',
+      content: 'We\'ve added several new features to enhance your community experience. Check out the new resource library and improved event calendar!',
+      date: 'May 12, 2023',
+      author: 'Admin Team'
     },
     {
       id: 2,
-      author: "Admin",
-      role: "Society Admin",
-      avatar: "A",
-      content: "NOTICE: Water supply will be interrupted tomorrow from 10 AM to 2 PM due to maintenance work. Please store water accordingly.",
-      timestamp: "5 hours ago",
-      likes: 3,
-      comments: 8,
-      isLiked: false,
-      type: "announcement"
+      title: 'Upcoming Maintenance: May 20',
+      content: 'The platform will be undergoing scheduled maintenance on May 20 from 2AM - 5AM EST. Please save your work ahead of time.',
+      date: 'May 10, 2023',
+      author: 'Tech Support'
+    }
+  ];
+
+  const featuredEvents = [
+    {
+      id: 1,
+      title: 'Community Meetup',
+      date: 'May 15, 2023',
+      time: '6:00 PM - 8:00 PM',
+      attendees: 24,
+      image: 'https://images.unsplash.com/photo-1528605105345-5344ea20e269?ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=80'
+    },
+    {
+      id: 2,
+      title: 'Workshop: Introduction to React',
+      date: 'May 20, 2023',
+      time: '3:00 PM - 5:00 PM',
+      attendees: 45,
+      image: 'https://images.unsplash.com/photo-1517048676732-d65bc937f952?ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=80'
     },
     {
       id: 3,
-      author: "Robert Fox",
-      role: "Chairperson",
-      avatar: "RF",
-      content: "Reminder: Monthly society meeting this Sunday at 11 AM in the community hall. Agenda includes discussion on new security measures and playground renovation.",
-      timestamp: "1 day ago",
-      likes: 24,
-      comments: 15,
-      isLiked: true,
-      type: "event"
-    },
-    {
-      id: 4,
-      author: "Maintenance Team",
-      role: "Staff",
-      avatar: "MT",
-      content: "The elevator in Block B has been repaired and is now operational. Thank you for your patience.",
-      timestamp: "2 days ago",
-      likes: 18,
-      comments: 2,
-      isLiked: false,
-      type: "maintenance"
+      title: 'Networking Event',
+      date: 'May 25, 2023',
+      time: '5:30 PM - 7:30 PM',
+      attendees: 32,
+      image: 'https://images.unsplash.com/photo-1536510233921-8e5043fce771?ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=80'
     }
-  ]);
+  ];
 
-  // Toggle like on a post
-  const toggleLike = (postId) => {
-    setPosts(posts.map(post => {
-      if (post.id === postId) {
-        return {
-          ...post,
-          likes: post.isLiked ? post.likes - 1 : post.likes + 1,
-          isLiked: !post.isLiked
-        };
-      }
-      return post;
-    }));
-  };
-
-  // Filter posts based on active tab
-  const filteredPosts = activeTab === "feed" 
-    ? posts 
-    : posts.filter(post => post.type === activeTab);
-
-  // Quick access cards data
-  const quickAccessCards = [
+  const activeDiscussions = [
     {
-      title: "Notifications",
-      icon: <Bell size={24} className="text-blue-500" />,
-      count: 5,
-      bgColor: "bg-blue-50 dark:bg-blue-900/20",
-      path: "/notifications"
+      id: 1,
+      title: 'Tips for remote collaboration',
+      author: 'Michael Johnson',
+      replies: 24,
+      lastActivity: '2 hours ago'
     },
     {
-      title: "Upcoming Events",
-      icon: <Calendar size={24} className="text-purple-500" />,
-      count: 2,
-      bgColor: "bg-purple-50 dark:bg-purple-900/20",
-      path: "/events"
+      id: 2,
+      title: 'What resource helped you the most when learning React?',
+      author: 'Sarah Williams',
+      replies: 18,
+      lastActivity: '5 hours ago'
     },
     {
-      title: "Maintenance",
-      icon: <Tool size={24} className="text-green-500" />,
-      count: 3,
-      bgColor: "bg-green-50 dark:bg-green-900/20",
-      path: "/maintenance"
-    },
-    {
-      title: "Urgent Notices",
-      icon: <AlertTriangle size={24} className="text-red-500" />,
-      count: 1,
-      bgColor: "bg-red-50 dark:bg-red-900/20",
-      path: "/notices"
+      id: 3,
+      title: 'Introduce yourself to the community!',
+      author: 'David Chen',
+      replies: 45,
+      lastActivity: 'Yesterday'
     }
   ];
 
   return (
-    <div className="max-w-6xl mx-auto">
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        {/* Left column - Feed */}
-        <div className="lg:col-span-2 space-y-6">
-          <div className="card">
-            <div className="p-4 border-b border-surface-200 dark:border-surface-700">
-              <h2 className="text-xl font-bold">Community Feed</h2>
-            </div>
-            
-            {/* Tabs */}
-            <div className="flex overflow-x-auto scrollbar-hide border-b border-surface-200 dark:border-surface-700">
-              <button 
-                onClick={() => setActiveTab("feed")}
-                className={`px-6 py-3 font-medium whitespace-nowrap transition-colors relative ${
-                  activeTab === "feed" 
-                    ? "text-primary" 
-                    : "text-surface-600 hover:text-surface-900 dark:text-surface-400 dark:hover:text-surface-100"
-                }`}
-              >
-                All Posts
-                {activeTab === "feed" && (
-                  <motion.div 
-                    layoutId="activeTab"
-                    className="absolute bottom-0 left-0 right-0 h-0.5 bg-primary"
-                  />
-                )}
-              </button>
-              <button 
-                onClick={() => setActiveTab("announcement")}
-                className={`px-6 py-3 font-medium whitespace-nowrap transition-colors relative ${
-                  activeTab === "announcement" 
-                    ? "text-primary" 
-                    : "text-surface-600 hover:text-surface-900 dark:text-surface-400 dark:hover:text-surface-100"
-                }`}
-              >
-                Announcements
-                {activeTab === "announcement" && (
-                  <motion.div 
-                    layoutId="activeTab"
-                    className="absolute bottom-0 left-0 right-0 h-0.5 bg-primary"
-                  />
-                )}
-              </button>
-              <button 
-                onClick={() => setActiveTab("event")}
-                className={`px-6 py-3 font-medium whitespace-nowrap transition-colors relative ${
-                  activeTab === "event" 
-                    ? "text-primary" 
-                    : "text-surface-600 hover:text-surface-900 dark:text-surface-400 dark:hover:text-surface-100"
-                }`}
-              >
-                Events
-                {activeTab === "event" && (
-                  <motion.div 
-                    layoutId="activeTab"
-                    className="absolute bottom-0 left-0 right-0 h-0.5 bg-primary"
-                  />
-                )}
-              </button>
-              <button 
-                onClick={() => setActiveTab("maintenance")}
-                className={`px-6 py-3 font-medium whitespace-nowrap transition-colors relative ${
-                  activeTab === "maintenance" 
-                    ? "text-primary" 
-                    : "text-surface-600 hover:text-surface-900 dark:text-surface-400 dark:hover:text-surface-100"
-                }`}
-              >
-                Maintenance
-                {activeTab === "maintenance" && (
-                  <motion.div 
-                    layoutId="activeTab"
-                    className="absolute bottom-0 left-0 right-0 h-0.5 bg-primary"
-                  />
-                )}
-              </button>
-            </div>
-            
-            {/* Posts */}
-            <div className="divide-y divide-surface-200 dark:divide-surface-700">
-              {filteredPosts.length > 0 ? (
-                filteredPosts.map(post => (
-                  <motion.div 
-                    key={post.id}
-                    initial={{ opacity: 0, y: 20 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ duration: 0.3 }}
-                    className="p-4"
-                  >
-                    <div className="flex items-start gap-3">
-                      <div className={`h-10 w-10 rounded-full flex items-center justify-center text-white font-medium
-                        ${post.type === 'announcement' ? 'bg-blue-500' : 
-                          post.type === 'event' ? 'bg-purple-500' : 
-                          post.type === 'maintenance' ? 'bg-green-500' : 
-                          'bg-primary-light'}`}
-                      >
-                        {post.avatar}
-                      </div>
-                      <div className="flex-1">
-                        <div className="flex items-center gap-2">
-                          <h3 className="font-semibold">{post.author}</h3>
-                          <span className="text-xs px-2 py-0.5 rounded-full bg-surface-100 dark:bg-surface-700 text-surface-600 dark:text-surface-300">
-                            {post.role}
-                          </span>
-                        </div>
-                        <p className="text-xs text-surface-500 dark:text-surface-400 mb-2">
-                          {post.timestamp}
-                        </p>
-                        <p className="mb-3 text-balance">{post.content}</p>
-                        <div className="flex items-center gap-4">
-                          <button 
-                            onClick={() => toggleLike(post.id)}
-                            className={`flex items-center gap-1 text-sm ${
-                              post.isLiked 
-                                ? 'text-red-500' 
-                                : 'text-surface-500 dark:text-surface-400 hover:text-red-500 dark:hover:text-red-500'
-                            }`}
-                          >
-                            <Heart size={18} className={post.isLiked ? "fill-current" : ""} />
-                            <span>{post.likes}</span>
-                          </button>
-                          <button className="flex items-center gap-1 text-sm text-surface-500 dark:text-surface-400 hover:text-primary dark:hover:text-primary">
-                            <MessageSquare size={18} />
-                            <span>{post.comments}</span>
-                          </button>
-                          <button className="flex items-center gap-1 text-sm text-surface-500 dark:text-surface-400 hover:text-primary dark:hover:text-primary">
-                            <Share2 size={18} />
-                          </button>
-                        </div>
-                      </div>
-                    </div>
-                  </motion.div>
-                ))
-              ) : (
-                <div className="p-8 text-center text-surface-500 dark:text-surface-400">
-                  No posts found in this category.
-                </div>
-              )}
-            </div>
+    <div className="p-6">
+      {/* Hero section */}
+      <div className="bg-gradient-to-r from-blue-600 to-blue-700 rounded-xl p-8 mb-8 text-white">
+        <div className="max-w-3xl">
+          <h1 className="text-3xl font-bold mb-4">Welcome to Our Community Hub</h1>
+          <p className="text-xl mb-6">Connect, collaborate, and grow with our vibrant community of like-minded individuals.</p>
+          <div className="flex flex-wrap gap-4">
+            <button className="bg-white text-blue-600 px-6 py-3 rounded-lg font-semibold hover:bg-blue-50 transition">
+              Join Discussions
+            </button>
+            <button className="bg-blue-500 text-white px-6 py-3 rounded-lg font-semibold border border-blue-400 hover:bg-blue-600 transition">
+              Explore Resources
+            </button>
           </div>
         </div>
+      </div>
+
+      {/* Quick access cards */}
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+        <div className="bg-white rounded-lg shadow-md p-6 flex flex-col items-center text-center hover:shadow-lg transition">
+          <div className="bg-blue-100 p-3 rounded-full mb-4">
+            <Calendar size={28} className="text-blue-600" />
+          </div>
+          <h3 className="font-semibold text-lg mb-2">Events</h3>
+          <p className="text-gray-600 mb-4">Discover upcoming events and meetups in the community.</p>
+          <button className="text-blue-600 font-medium flex items-center mt-auto">
+            View Events <ArrowRight size={16} className="ml-1" />
+          </button>
+        </div>
         
-        {/* Right column - Quick access and create post */}
-        <div className="space-y-6">
-          {/* Quick access cards */}
-          <div className="grid grid-cols-2 gap-4">
-            {quickAccessCards.map((card, index) => (
-              <motion.a
-                key={index}
-                href={card.path}
-                whileHover={{ y: -5 }}
-                className={`${card.bgColor} p-4 rounded-xl border border-surface-200 dark:border-surface-700 flex flex-col items-center justify-center text-center gap-2 transition-all hover:shadow-md`}
-              >
-                <div className="p-2 rounded-full bg-white dark:bg-surface-800 shadow-sm">
-                  {card.icon}
+        <div className="bg-white rounded-lg shadow-md p-6 flex flex-col items-center text-center hover:shadow-lg transition">
+          <div className="bg-blue-100 p-3 rounded-full mb-4">
+            <FileText size={28} className="text-blue-600" />
+          </div>
+          <h3 className="font-semibold text-lg mb-2">Resources</h3>
+          <p className="text-gray-600 mb-4">Access our library of helpful guides, tutorials and templates.</p>
+          <button className="text-blue-600 font-medium flex items-center mt-auto">
+            Browse Resources <ArrowRight size={16} className="ml-1" />
+          </button>
+        </div>
+        
+        <div className="bg-white rounded-lg shadow-md p-6 flex flex-col items-center text-center hover:shadow-lg transition">
+          <div className="bg-blue-100 p-3 rounded-full mb-4">
+            <MessageSquare size={28} className="text-blue-600" />
+          </div>
+          <h3 className="font-semibold text-lg mb-2">Discussions</h3>
+          <p className="text-gray-600 mb-4">Join conversations and share your insights with the community.</p>
+          <button className="text-blue-600 font-medium flex items-center mt-auto">
+            Join Discussions <ArrowRight size={16} className="ml-1" />
+          </button>
+        </div>
+        
+        <div className="bg-white rounded-lg shadow-md p-6 flex flex-col items-center text-center hover:shadow-lg transition">
+          <div className="bg-blue-100 p-3 rounded-full mb-4">
+            <Users size={28} className="text-blue-600" />
+          </div>
+          <h3 className="font-semibold text-lg mb-2">Members</h3>
+          <p className="text-gray-600 mb-4">Connect with other members and expand your network.</p>
+          <button className="text-blue-600 font-medium flex items-center mt-auto">
+            Find Members <ArrowRight size={16} className="ml-1" />
+          </button>
+        </div>
+      </div>
+
+      {/* Content Grid */}
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+        {/* Announcements */}
+        <div className="bg-white rounded-lg shadow-md p-6">
+          <div className="flex justify-between items-center mb-4">
+            <h2 className="text-xl font-semibold">Announcements</h2>
+            <button className="text-blue-600 font-medium text-sm">View All</button>
+          </div>
+          <div className="space-y-4">
+            {announcements.map(announcement => (
+              <div key={announcement.id} className="border-b border-gray-100 pb-4 last:border-0 last:pb-0">
+                <h3 className="font-medium text-lg">{announcement.title}</h3>
+                <p className="text-gray-600 text-sm mb-2">{announcement.content}</p>
+                <div className="flex justify-between text-xs text-gray-500">
+                  <span>{announcement.date}</span>
+                  <span>{announcement.author}</span>
                 </div>
-                <h3 className="font-medium">{card.title}</h3>
-                <div className="text-2xl font-bold">{card.count}</div>
-              </motion.a>
+              </div>
             ))}
           </div>
-          
-          {/* Create post component */}
-          <MainFeature />
+        </div>
+
+        {/* Featured Events */}
+        <div className="bg-white rounded-lg shadow-md p-6">
+          <div className="flex justify-between items-center mb-4">
+            <h2 className="text-xl font-semibold">Featured Events</h2>
+            <button className="text-blue-600 font-medium text-sm">View All</button>
+          </div>
+          <div className="space-y-4">
+            {featuredEvents.map(event => (
+              <div key={event.id} className="flex border-b border-gray-100 pb-4 last:border-0 last:pb-0">
+                <img 
+                  src={event.image} 
+                  alt={event.title} 
+                  className="w-20 h-20 rounded-lg object-cover mr-3"
+                />
+                <div>
+                  <h3 className="font-medium">{event.title}</h3>
+                  <p className="text-sm text-gray-600">{event.date}</p>
+                  <p className="text-sm text-gray-600">{event.time}</p>
+                  <div className="flex items-center text-xs text-gray-500 mt-1">
+                    <Users size={12} className="mr-1" />
+                    <span>{event.attendees} attending</span>
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+
+        {/* Active Discussions */}
+        <div className="bg-white rounded-lg shadow-md p-6">
+          <div className="flex justify-between items-center mb-4">
+            <h2 className="text-xl font-semibold">Active Discussions</h2>
+            <button className="text-blue-600 font-medium text-sm">View All</button>
+          </div>
+          <div className="space-y-4">
+            {activeDiscussions.map(discussion => (
+              <div key={discussion.id} className="border-b border-gray-100 pb-4 last:border-0 last:pb-0">
+                <h3 className="font-medium">{discussion.title}</h3>
+                <p className="text-sm text-gray-600">Started by {discussion.author}</p>
+                <div className="flex justify-between text-xs text-gray-500 mt-1">
+                  <div className="flex items-center">
+                    <MessageSquare size={12} className="mr-1" />
+                    <span>{discussion.replies} replies</span>
+                  </div>
+                  <span>Last activity: {discussion.lastActivity}</span>
+                </div>
+              </div>
+            ))}
+          </div>
         </div>
       </div>
     </div>
