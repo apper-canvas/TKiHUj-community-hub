@@ -1,11 +1,12 @@
 import React, { useState, useEffect } from "react";
-import { BrowserRouter as Router, Routes, Route, Link, useLocation } from "react-router-dom";
+import { Routes, Route, Link, useLocation } from "react-router-dom";
 import { Sun, Moon, Menu, X, Bell, Calendar, Wrench, User, LogOut } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import Home from "./pages/Home";
 import Dashboard from "./pages/Dashboard";
 import Events from "./pages/Events";
 import Resources from "./pages/Resources";
+import NotFound from "./pages/NotFound";
 
 const Sidebar = ({ isOpen, toggleSidebar }) => {
   const location = useLocation();
@@ -138,28 +139,27 @@ const App = () => {
   }, [darkMode]);
 
   return (
-    <Router>
-      <div className={`flex ${darkMode ? "dark" : ""}`}>
-        <Sidebar isOpen={sidebarOpen} toggleSidebar={toggleSidebar} />
+    <div className={`flex ${darkMode ? "dark" : ""}`}>
+      <Sidebar isOpen={sidebarOpen} toggleSidebar={toggleSidebar} />
+      
+      <div className="flex-1 md:ml-64 bg-gray-50 min-h-screen flex flex-col">
+        <Header 
+          toggleSidebar={toggleSidebar} 
+          toggleDarkMode={toggleDarkMode} 
+          darkMode={darkMode} 
+        />
         
-        <div className="flex-1 md:ml-64 bg-gray-50 min-h-screen flex flex-col">
-          <Header 
-            toggleSidebar={toggleSidebar} 
-            toggleDarkMode={toggleDarkMode} 
-            darkMode={darkMode} 
-          />
-          
-          <main className="flex-1">
-            <Routes>
-              <Route path="/" element={<Home />} />
-              <Route path="/dashboard" element={<Dashboard />} />
-              <Route path="/events" element={<Events />} />
-              <Route path="/resources" element={<Resources />} />
-            </Routes>
-          </main>
-        </div>
+        <main className="flex-1">
+          <Routes>
+            <Route path="/" element={<Home />} />
+            <Route path="/dashboard" element={<Dashboard />} />
+            <Route path="/events" element={<Events />} />
+            <Route path="/resources" element={<Resources />} />
+            <Route path="*" element={<NotFound />} />
+          </Routes>
+        </main>
       </div>
-    </Router>
+    </div>
   );
 };
 
