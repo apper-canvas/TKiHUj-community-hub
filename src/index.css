@@ -12,11 +12,15 @@
   }
   
   .btn-primary {
-    @apply bg-blue-600 text-white hover:bg-blue-700;
+    @apply bg-primary text-white hover:bg-primary-dark;
   }
   
   .btn-secondary {
-    @apply bg-purple-600 text-white hover:bg-purple-700;
+    @apply bg-secondary text-gray-800 hover:bg-secondary-dark;
+  }
+  
+  .btn-accent {
+    @apply bg-accent text-white hover:bg-accent/90;
   }
   
   .btn-outline {
@@ -24,14 +28,18 @@
   }
   
   .input {
-    @apply w-full border border-gray-300 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent;
+    @apply w-full border border-gray-300 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent;
   }
 }
 
 :root {
-  --primary: #3b82f6;
-  --primary-dark: #2563eb;
-  --accent: #8b5cf6;
+  --primary: #0066FF;
+  --primary-dark: #0047B3;
+  --primary-light: #4D94FF;
+  --secondary: #FFCC00;
+  --secondary-dark: #CCAA00;
+  --secondary-light: #FFDB4D;
+  --accent: #FF3399;
   --surface-50: #fafafa;
   --surface-100: #f4f4f5;
   --surface-200: #e4e4e7;
@@ -45,8 +53,11 @@
 }
 
 .dark {
-  --primary: #60a5fa;
-  --primary-dark: #3b82f6;
+  --primary: #4D94FF;
+  --primary-dark: #0066FF;
+  --secondary: #FFDB4D;
+  --secondary-dark: #FFCC00;
+  --accent: #FF66B3;
   color-scheme: dark;
 }
 
