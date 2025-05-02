@@ -1,15 +1,23 @@
 import React, { useState, useEffect } from "react";
-import { Routes, Route, Link, useLocation } from "react-router-dom";
+import { Routes, Route, Link, useLocation, useNavigate } from "react-router-dom";
+import { useSelector, useDispatch } from 'react-redux';
 import { Sun, Moon, Menu, X, Bell, Calendar, Wrench, User, LogOut } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
+import { clearUser } from './store/userSlice';
+import ProtectedRoute from './components/ProtectedRoute';
 import Home from "./pages/Home";
 import Dashboard from "./pages/Dashboard";
 import Events from "./pages/Events";
 import Resources from "./pages/Resources";
+import Login from "./pages/Login";
+import Signup from "./pages/Signup";
 import NotFound from "./pages/NotFound";
 
 const Sidebar = ({ isOpen, toggleSidebar }) => {
   const location = useLocation();
+  const { isAuthenticated, user } = useSelector((state) => state.user);
+  const dispatch = useDispatch();
+  const navigate = useNavigate();
   
   const menuItems = [
     { icon: User, text: "Home", path: "/" },
@@ -17,6 +25,11 @@ const Sidebar = ({ isOpen, toggleSidebar }) => {
     { icon: Calendar, text: "Events", path: "/events" },
     { icon: Wrench, text: "Resources", path: "/resources" },
   ];
+
+  const handleLogout = () => {
+    dispatch(clearUser());
+    navigate('/login');
+  };
 
   return (
     <>
@@ -49,6 +62,21 @@ const Sidebar = ({ isOpen, toggleSidebar }) => {
           </button>
         </div>
 
+        {isAuthenticated && user && (
+          <div className="p-4 border-b">
+            <div className="flex items-center">
+              <div className="h-10 w-10 rounded-full bg-blue-500 flex items-center justify-center text-white">
+                {user.firstName ? user.firstName.charAt(0) : ''}
+                {user.lastName ? user.lastName.charAt(0) : ''}
+              </div>
+              <div className="ml-3">
+                <p className="font-medium">{user.firstName} {user.lastName}</p>
+                <p className="text-sm text-gray-500">{user.emailAddress}</p>
+              </div>
+            </div>
+          </div>
+        )}
+
         <div className="py-4">
           {menuItems.map((item, index) => {
             const Icon = item.icon;
@@ -71,10 +99,24 @@ const Sidebar = ({ isOpen, toggleSidebar }) => {
         </div>
 
         <div className="absolute bottom-0 left-0 right-0 p-4 border-t">
-          <button className="flex items-center px-4 py-3 text-gray-700 hover:bg-gray-100 rounded-md w-full">
-            <LogOut size={20} className="mr-3" />
-            <span>Logout</span>
-          </button>
+          {isAuthenticated ? (
+            <button 
+              className="flex items-center px-4 py-3 text-gray-700 hover:bg-gray-100 rounded-md w-full"
+              onClick={handleLogout}
+            >
+              <LogOut size={20} className="mr-3" />
+              <span>Logout</span>
+            </button>
+          ) : (
+            <Link
+              to="/login"
+              className="flex items-center px-4 py-3 text-gray-700 hover:bg-gray-100 rounded-md w-full"
+              onClick={() => toggleSidebar()}
+            >
+              <User size={20} className="mr-3" />
+              <span>Login</span>
+            </Link>
+          )}
         </div>
       </motion.div>
     </>
@@ -82,6 +124,8 @@ const Sidebar = ({ isOpen, toggleSidebar }) => {
 };
 
 const Header = ({ toggleSidebar, toggleDarkMode, darkMode }) => {
+  const { isAuthenticated, user } = useSelector((state) => state.user);
+  
   return (
     <header className="bg-white shadow-sm sticky top-0 z-10">
       <div className="flex items-center justify-between p-4">
@@ -101,17 +145,22 @@ const Header = ({ toggleSidebar, toggleDarkMode, darkMode }) => {
           >
             {darkMode ? <Sun size={20} /> : <Moon size={20} />}
           </button>
-          <button className="p-2 rounded-full hover:bg-gray-100 relative">
-            <Bell size={20} />
-            <span className="absolute top-0 right-0 h-4 w-4 bg-red-500 rounded-full text-xs text-white flex items-center justify-center">
-              3
-            </span>
-          </button>
-          <button className="flex items-center space-x-2 focus:outline-none">
-            <div className="h-8 w-8 rounded-full bg-blue-500 flex items-center justify-center text-white">
-              JS
-            </div>
-          </button>
+          {isAuthenticated && (
+            <button className="p-2 rounded-full hover:bg-gray-100 relative">
+              <Bell size={20} />
+              <span className="absolute top-0 right-0 h-4 w-4 bg-red-500 rounded-full text-xs text-white flex items-center justify-center">
+                3
+              </span>
+            </button>
+          )}
+          {isAuthenticated && user && (
+            <button className="flex items-center space-x-2 focus:outline-none">
+              <div className="h-8 w-8 rounded-full bg-blue-500 flex items-center justify-center text-white">
+                {user.firstName ? user.firstName.charAt(0) : ''}
+                {user.lastName ? user.lastName.charAt(0) : ''}
+              </div>
+            </button>
+          )}
         </div>
       </div>
     </header>
@@ -121,6 +170,7 @@ const Header = ({ toggleSidebar, toggleDarkMode, darkMode }) => {
 const App = () => {
   const [darkMode, setDarkMode] = useState(false);
   const [sidebarOpen, setSidebarOpen] = useState(false);
+  const { isAuthenticated } = useSelector((state) => state.user);
 
   const toggleDarkMode = () => {
     setDarkMode(!darkMode);
@@ -151,10 +201,28 @@ const App = () => {
         
         <main className="flex-1">
           <Routes>
-            <Route path="/" element={<Home />} />
-            <Route path="/dashboard" element={<Dashboard />} />
-            <Route path="/events" element={<Events />} />
-            <Route path="/resources" element={<Resources />} />
+            <Route path="/login" element={<Login />} />
+            <Route path="/signup" element={<Signup />} />
+            <Route path="/" element={
+              <ProtectedRoute>
+                <Home />
+              </ProtectedRoute>
+            } />
+            <Route path="/dashboard" element={
+              <ProtectedRoute>
+                <Dashboard />
+              </ProtectedRoute>
+            } />
+            <Route path="/events" element={
+              <ProtectedRoute>
+                <Events />
+              </ProtectedRoute>
+            } />
+            <Route path="/resources" element={
+              <ProtectedRoute>
+                <Resources />
+              </ProtectedRoute>
+            } />
             <Route path="*" element={<NotFound />} />
           </Routes>
         </main>

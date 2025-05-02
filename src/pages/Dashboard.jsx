@@ -1,9 +1,53 @@
-import React from "react";
+import React, { useState, useEffect } from "react";
 import { Calendar, Users, Eye, Radio, ArrowUp, ArrowDown } from "lucide-react";
 import Chart from "react-apexcharts";
+import { fetchActivities, countActivitiesByType } from "../services/activityService";
+import { fetchEvents } from "../services/eventService";
 
 const Dashboard = () => {
-  // Sample data for charts
+  const [loading, setLoading] = useState(true);
+  const [activities, setActivities] = useState([]);
+  const [activityCounts, setActivityCounts] = useState([]);
+  const [upcomingEvents, setUpcomingEvents] = useState(0);
+  const [error, setError] = useState(null);
+
+  // Fetch dashboard data on component mount
+  useEffect(() => {
+    const fetchDashboardData = async () => {
+      try {
+        setLoading(true);
+        
+        // Fetch recent activities
+        const recentActivities = await fetchActivities({ limit: 5 });
+        setActivities(recentActivities);
+        
+        // Fetch activity counts by type
+        const counts = await countActivitiesByType();
+        setActivityCounts(counts);
+        
+        // Fetch upcoming events
+        const now = new Date();
+        const futureEvents = await fetchEvents({ 
+          where: [{ 
+            field: 'date', 
+            operator: 'greaterThan', 
+            value: now.toISOString() 
+          }]
+        });
+        setUpcomingEvents(futureEvents.length);
+        
+        setLoading(false);
+      } catch (err) {
+        console.error("Error fetching dashboard data:", err);
+        setError("Failed to load dashboard data. Please try again later.");
+        setLoading(false);
+      }
+    };
+
+    fetchDashboardData();
+  }, []);
+
+  // Activity data for charts
   const communityActivityOptions = {
     chart: {
       toolbar: {
@@ -48,14 +92,35 @@ const Dashboard = () => {
     },
   };
 
+  // Convert activity data for chart
+  const activityByType = {};
+  activities.forEach(activity => {
+    const day = new Date(activity.date).getDay();
+    const dayMap = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
+    const dayName = dayMap[day];
+    
+    if (!activityByType[activity.type]) {
+      activityByType[activity.type] = {
+        Mon: 0, Tue: 0, Wed: 0, Thu: 0, Fri: 0, Sat: 0, Sun: 0
+      };
+    }
+    
+    activityByType[activity.type][dayName]++;
+  });
+
+  // Format data for the chart
   const communityActivitySeries = [
     {
       name: 'Posts',
-      data: [12, 9, 15, 10, 14, 17, 8],
+      data: activityByType.Post ? 
+        ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'].map(day => activityByType.Post[day] || 0) : 
+        [12, 9, 15, 10, 14, 17, 8], // Fallback data
     },
     {
       name: 'Events',
-      data: [2, 3, 1, 4, 2, 5, 1],
+      data: activityByType.Event ? 
+        ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'].map(day => activityByType.Event[day] || 0) : 
+        [2, 3, 1, 4, 2, 5, 1], // Fallback data
     },
   ];
 
@@ -95,7 +160,7 @@ const Dashboard = () => {
     },
     {
       title: "Active Posts",
-      value: "543",
+      value: activities.filter(a => a.type === "Post" && a.status === "Active").length.toString() || "543",
       icon: Radio,
       change: "+18%",
       increase: true
@@ -109,12 +174,36 @@ const Dashboard = () => {
     },
     {
       title: "Upcoming Events",
-      value: "8",
+      value: upcomingEvents.toString() || "8",
       icon: Calendar,
       change: "+5%",
       increase: true
     }
   ];
+
+  if (loading) {
+    return (
+      <div className="container mx-auto px-4 py-6 flex justify-center items-center min-h-[60vh]">
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-500"></div>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="container mx-auto px-4 py-6">
+        <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded">
+          <p>{error}</p>
+          <button 
+            className="mt-2 bg-red-500 text-white px-4 py-2 rounded hover:bg-red-600"
+            onClick={() => window.location.reload()}
+          >
+            Retry
+          </button>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="container mx-auto px-4 py-6">
@@ -185,39 +274,49 @@ const Dashboard = () => {
               </tr>
             </thead>
             <tbody className="divide-y">
-              {[
-                { activity: "New post created", member: "John Doe", type: "Post", date: "Today, 10:30 AM", status: "Active" },
-                { activity: "Event announcement", member: "Sarah Johnson", type: "Event", date: "Yesterday, 2:15 PM", status: "Active" },
-                { activity: "Resource updated", member: "Mike Brown", type: "Resource", date: "Jun 15, 2023", status: "Active" },
-                { activity: "Maintenance request", member: "Emma Wilson", type: "Maintenance", date: "Jun 14, 2023", status: "Resolved" },
-                { activity: "Community poll created", member: "Robert Clark", type: "Poll", date: "Jun 12, 2023", status: "Closed" },
-              ].map((item, index) => (
-                <tr key={index}>
-                  <td className="py-3 px-4">{item.activity}</td>
-                  <td className="py-3 px-4">{item.member}</td>
-                  <td className="py-3 px-4">
-                    <span className={`inline-block px-2 py-1 rounded-full text-xs font-medium ${
-                      item.type === 'Post' ? 'bg-blue-100 text-blue-700' :
-                      item.type === 'Event' ? 'bg-purple-100 text-purple-700' : 
-                      item.type === 'Resource' ? 'bg-amber-100 text-amber-700' :
-                      item.type === 'Maintenance' ? 'bg-green-100 text-green-700' :
-                      'bg-gray-100 text-gray-700'
-                    }`}>
-                      {item.type}
-                    </span>
-                  </td>
-                  <td className="py-3 px-4">{item.date}</td>
-                  <td className="py-3 px-4 text-right">
-                    <span className={`inline-block px-2 py-1 rounded-full text-xs font-medium ${
-                      item.status === 'Active' ? 'bg-green-100 text-green-700' :
-                      item.status === 'Resolved' ? 'bg-blue-100 text-blue-700' :
-                      'bg-gray-100 text-gray-700'
-                    }`}>
-                      {item.status}
-                    </span>
+              {activities.length > 0 ? (
+                activities.map((activity) => (
+                  <tr key={activity.Id}>
+                    <td className="py-3 px-4">{activity.activity_description}</td>
+                    <td className="py-3 px-4">{activity.member}</td>
+                    <td className="py-3 px-4">
+                      <span className={`inline-block px-2 py-1 rounded-full text-xs font-medium ${
+                        activity.type === 'Post' ? 'bg-blue-100 text-blue-700' :
+                        activity.type === 'Event' ? 'bg-purple-100 text-purple-700' : 
+                        activity.type === 'Resource' ? 'bg-amber-100 text-amber-700' :
+                        activity.type === 'Maintenance' ? 'bg-green-100 text-green-700' :
+                        'bg-gray-100 text-gray-700'
+                      }`}>
+                        {activity.type}
+                      </span>
+                    </td>
+                    <td className="py-3 px-4">
+                      {new Date(activity.date).toLocaleDateString('en-US', {
+                        year: 'numeric',
+                        month: 'short',
+                        day: 'numeric',
+                        hour: '2-digit',
+                        minute: '2-digit'
+                      })}
+                    </td>
+                    <td className="py-3 px-4 text-right">
+                      <span className={`inline-block px-2 py-1 rounded-full text-xs font-medium ${
+                        activity.status === 'Active' ? 'bg-green-100 text-green-700' :
+                        activity.status === 'Resolved' ? 'bg-blue-100 text-blue-700' :
+                        'bg-gray-100 text-gray-700'
+                      }`}>
+                        {activity.status}
+                      </span>
+                    </td>
+                  </tr>
+                ))
+              ) : (
+                <tr>
+                  <td colSpan="5" className="py-8 text-center text-gray-500">
+                    No recent activities found.
                   </td>
                 </tr>
-              ))}
+              )}
             </tbody>
           </table>
         </div>

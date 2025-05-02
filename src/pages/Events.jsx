@@ -1,55 +1,38 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Calendar, MapPin, Clock, Filter, Plus, ChevronLeft, ChevronRight } from "lucide-react";
 import { format, addMonths, subMonths, startOfMonth, endOfMonth, eachDayOfInterval, getDay, isSameMonth, isToday, isSameDay } from "date-fns";
+import { fetchEvents, createEvent, updateEvent, deleteEvent } from "../services/eventService";
 
 const Events = () => {
   const [currentMonth, setCurrentMonth] = useState(new Date());
   const [selectedDate, setSelectedDate] = useState(new Date());
   const [viewMode, setViewMode] = useState("month"); // "month" or "list"
+  const [events, setEvents] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
   
-  // Sample events data
-  const events = [
-    {
-      id: 1,
-      title: "Community Meeting",
-      date: new Date(2023, 5, 18, 15, 0),
-      location: "Community Center",
-      description: "Monthly community meeting to discuss upcoming projects and initiatives.",
-      type: "meeting",
-    },
-    {
-      id: 2,
-      title: "Summer Picnic",
-      date: new Date(2023, 5, 24, 12, 0),
-      location: "Central Park",
-      description: "Annual summer picnic for all community members. Bring your family and enjoy food, games, and music!",
-      type: "social",
-    },
-    {
-      id: 3,
-      title: "Neighborhood Cleanup",
-      date: new Date(2023, 5, 15, 9, 0),
-      location: "Main Street",
-      description: "Volunteer event to clean up our neighborhood. Supplies will be provided.",
-      type: "volunteer",
-    },
-    {
-      id: 4,
-      title: "Board Election",
-      date: new Date(2023, 5, 30, 18, 0),
-      location: "Online",
-      description: "Annual board member election meeting. All residents are encouraged to attend and vote.",
-      type: "meeting",
-    },
-    {
-      id: 5,
-      title: "Kids Fun Day",
-      date: new Date(2023, 5, 20, 10, 0),
-      location: "Community Park",
-      description: "A day filled with games, activities, and entertainment for children of all ages.",
-      type: "social",
-    },
-  ];
+  // Modal states
+  const [showEventModal, setShowEventModal] = useState(false);
+  const [eventToEdit, setEventToEdit] = useState(null);
+  
+  // Load events on component mount
+  useEffect(() => {
+    loadEvents();
+  }, []);
+  
+  // Load events from the database
+  const loadEvents = async () => {
+    try {
+      setLoading(true);
+      const data = await fetchEvents();
+      setEvents(data);
+      setLoading(false);
+    } catch (err) {
+      console.error("Error loading events:", err);
+      setError("Failed to load events. Please try again later.");
+      setLoading(false);
+    }
+  };
   
   // Functions for calendar navigation
   const prevMonth = () => {
@@ -62,7 +45,65 @@ const Events = () => {
   
   // Function to get events for a specific date
   const getEventsForDate = (date) => {
-    return events.filter(event => isSameDay(event.date, date));
+    return events.filter(event => {
+      const eventDate = new Date(event.date);
+      return isSameDay(eventDate, date);
+    });
+  };
+  
+  // Handle event creation/update
+  const handleSaveEvent = async (eventData) => {
+    try {
+      setLoading(true);
+      
+      if (eventToEdit) {
+        // Update existing event
+        await updateEvent(eventToEdit.Id, eventData);
+      } else {
+        // Create new event
+        await createEvent(eventData);
+      }
+      
+      // Reload events
+      await loadEvents();
+      
+      // Close modal
+      setShowEventModal(false);
+      setEventToEdit(null);
+      setLoading(false);
+    } catch (err) {
+      console.error("Error saving event:", err);
+      setError("Failed to save event. Please try again later.");
+      setLoading(false);
+    }
+  };
+  
+  // Handle event deletion
+  const handleDeleteEvent = async (eventId) => {
+    if (window.confirm("Are you sure you want to delete this event?")) {
+      try {
+        setLoading(true);
+        await deleteEvent(eventId);
+        await loadEvents();
+        setLoading(false);
+      } catch (err) {
+        console.error("Error deleting event:", err);
+        setError("Failed to delete event. Please try again later.");
+        setLoading(false);
+      }
+    }
+  };
+  
+  // Open edit modal
+  const handleEditEvent = (event) => {
+    setEventToEdit(event);
+    setShowEventModal(true);
+  };
+  
+  // Open create modal
+  const handleAddEvent = () => {
+    setEventToEdit(null);
+    setShowEventModal(true);
   };
   
   // Function to render the calendar grid
@@ -184,6 +225,32 @@ const Events = () => {
   // Get events for the selected date
   const selectedDateEvents = getEventsForDate(selectedDate);
   
+  // Loading state
+  if (loading && events.length === 0) {
+    return (
+      <div className="container mx-auto px-4 py-6 flex justify-center items-center min-h-[60vh]">
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-500"></div>
+      </div>
+    );
+  }
+  
+  // Error state
+  if (error && events.length === 0) {
+    return (
+      <div className="container mx-auto px-4 py-6">
+        <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded">
+          <p>{error}</p>
+          <button 
+            className="mt-2 bg-red-500 text-white px-4 py-2 rounded hover:bg-red-600"
+            onClick={loadEvents}
+          >
+            Retry
+          </button>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="container mx-auto px-4 py-6">
       <div className="flex justify-between items-center mb-8">
@@ -191,7 +258,10 @@ const Events = () => {
           <h1 className="text-3xl font-bold">Events</h1>
           <p className="text-gray-600 mt-2">Browse and manage community events</p>
         </div>
-        <button className="btn btn-primary">
+        <button 
+          className="btn btn-primary"
+          onClick={handleAddEvent}
+        >
           <Plus size={18} className="mr-2" />
           Create Event
         </button>
@@ -241,42 +311,67 @@ const Events = () => {
         ) : (
           <div className="p-4">
             <div className="space-y-4">
-              {events.map(event => (
-                <div key={event.id} className="border rounded-lg p-4 hover:shadow-md transition-shadow">
-                  <div className="flex flex-wrap gap-4">
-                    <div className="flex flex-col items-center justify-center h-16 w-16 rounded-lg bg-blue-100 text-blue-800 shrink-0">
-                      <span className="text-sm font-medium">{format(event.date, 'MMM')}</span>
-                      <span className="text-2xl font-bold">{format(event.date, 'd')}</span>
-                    </div>
-                    
-                    <div className="flex-1">
-                      <h3 className="text-xl font-semibold">{event.title}</h3>
-                      <div className="mt-2 flex flex-col gap-1">
-                        <div className="flex items-center text-gray-600">
-                          <Clock size={16} className="mr-1" />
-                          <span>{format(event.date, 'h:mm a')}</span>
+              {events.length > 0 ? (
+                events.map(event => (
+                  <div key={event.Id} className="border rounded-lg p-4 hover:shadow-md transition-shadow">
+                    <div className="flex flex-wrap gap-4">
+                      <div className="flex flex-col items-center justify-center h-16 w-16 rounded-lg bg-blue-100 text-blue-800 shrink-0">
+                        <span className="text-sm font-medium">{format(new Date(event.date), 'MMM')}</span>
+                        <span className="text-2xl font-bold">{format(new Date(event.date), 'd')}</span>
+                      </div>
+                      
+                      <div className="flex-1">
+                        <h3 className="text-xl font-semibold">{event.title}</h3>
+                        <div className="mt-2 flex flex-col gap-1">
+                          <div className="flex items-center text-gray-600">
+                            <Clock size={16} className="mr-1" />
+                            <span>{format(new Date(event.date), 'h:mm a')}</span>
+                          </div>
+                          <div className="flex items-center text-gray-600">
+                            <MapPin size={16} className="mr-1" />
+                            <span>{event.location}</span>
+                          </div>
                         </div>
-                        <div className="flex items-center text-gray-600">
-                          <MapPin size={16} className="mr-1" />
-                          <span>{event.location}</span>
-                        </div>
+                      </div>
+                      
+                      <div className="flex items-start">
+                        <span className={`px-3 py-1 rounded-full text-sm font-medium ${
+                          event.type === 'meeting' ? 'bg-blue-100 text-blue-800' :
+                          event.type === 'social' ? 'bg-purple-100 text-purple-800' :
+                          'bg-green-100 text-green-800'
+                        }`}>
+                          {event.type.charAt(0).toUpperCase() + event.type.slice(1)}
+                        </span>
                       </div>
                     </div>
                     
-                    <div className="flex items-start">
-                      <span className={`px-3 py-1 rounded-full text-sm font-medium ${
-                        event.type === 'meeting' ? 'bg-blue-100 text-blue-800' :
-                        event.type === 'social' ? 'bg-purple-100 text-purple-800' :
-                        'bg-green-100 text-green-800'
-                      }`}>
-                        {event.type.charAt(0).toUpperCase() + event.type.slice(1)}
-                      </span>
+                    <p className="mt-3 text-gray-600">{event.description}</p>
+                    
+                    <div className="mt-4 flex justify-end gap-2">
+                      <button
+                        className="btn btn-outline px-3 py-1"
+                        onClick={() => handleEditEvent(event)}
+                      >
+                        Edit
+                      </button>
+                      <button
+                        className="btn btn-outline px-3 py-1 text-red-500 border-red-500 hover:bg-red-50"
+                        onClick={() => handleDeleteEvent(event.Id)}
+                      >
+                        Delete
+                      </button>
                     </div>
                   </div>
-                  
-                  <p className="mt-3 text-gray-600">{event.description}</p>
+                ))
+              ) : (
+                <div className="p-8 text-center">
+                  <div className="text-gray-400 mb-3">
+                    <Calendar size={48} className="mx-auto" />
+                  </div>
+                  <h3 className="text-xl font-medium mb-1">No events found</h3>
+                  <p className="text-gray-500">Create your first event by clicking the "Create Event" button</p>
                 </div>
-              ))}
+              )}
             </div>
           </div>
         )}
@@ -290,12 +385,12 @@ const Events = () => {
           
           <div className="p-4 space-y-4">
             {selectedDateEvents.map(event => (
-              <div key={event.id} className="border rounded-lg p-4">
+              <div key={event.Id} className="border rounded-lg p-4">
                 <h3 className="text-xl font-semibold">{event.title}</h3>
                 <div className="mt-2 flex items-center gap-4">
                   <div className="flex items-center text-gray-600">
                     <Clock size={16} className="mr-1" />
-                    <span>{format(event.date, 'h:mm a')}</span>
+                    <span>{format(new Date(event.date), 'h:mm a')}</span>
                   </div>
                   <div className="flex items-center text-gray-600">
                     <MapPin size={16} className="mr-1" />
@@ -310,8 +405,107 @@ const Events = () => {
                   </span>
                 </div>
                 <p className="mt-3 text-gray-600">{event.description}</p>
+                
+                <div className="mt-4 flex justify-end gap-2">
+                  <button
+                    className="btn btn-outline px-3 py-1"
+                    onClick={() => handleEditEvent(event)}
+                  >
+                    Edit
+                  </button>
+                  <button
+                    className="btn btn-outline px-3 py-1 text-red-500 border-red-500 hover:bg-red-50"
+                    onClick={() => handleDeleteEvent(event.Id)}
+                  >
+                    Delete
+                  </button>
+                </div>
               </div>
             ))}
+          </div>
+        </div>
+      )}
+      
+      {/* Event Modal would go here (omitted for brevity) */}
+      {showEventModal && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <div className="bg-white rounded-lg shadow-xl p-6 max-w-lg w-full max-h-[90vh] overflow-y-auto">
+            <h2 className="text-2xl font-bold mb-4">
+              {eventToEdit ? "Edit Event" : "Create Event"}
+            </h2>
+            <div className="mb-4">
+              <label className="block text-gray-700 mb-2">Title</label>
+              <input
+                type="text"
+                className="input w-full"
+                placeholder="Event title"
+                defaultValue={eventToEdit?.title || ""}
+              />
+            </div>
+            <div className="mb-4">
+              <label className="block text-gray-700 mb-2">Date & Time</label>
+              <input
+                type="datetime-local"
+                className="input w-full"
+                defaultValue={eventToEdit?.date ? new Date(eventToEdit.date).toISOString().slice(0, 16) : ""}
+              />
+            </div>
+            <div className="mb-4">
+              <label className="block text-gray-700 mb-2">Location</label>
+              <input
+                type="text"
+                className="input w-full"
+                placeholder="Event location"
+                defaultValue={eventToEdit?.location || ""}
+              />
+            </div>
+            <div className="mb-4">
+              <label className="block text-gray-700 mb-2">Description</label>
+              <textarea
+                className="input w-full min-h-[100px]"
+                placeholder="Event description"
+                defaultValue={eventToEdit?.description || ""}
+              ></textarea>
+            </div>
+            <div className="mb-4">
+              <label className="block text-gray-700 mb-2">Type</label>
+              <select
+                className="input w-full"
+                defaultValue={eventToEdit?.type || "meeting"}
+              >
+                <option value="meeting">Meeting</option>
+                <option value="social">Social</option>
+                <option value="volunteer">Volunteer</option>
+              </select>
+            </div>
+            
+            <div className="flex justify-end gap-2 mt-6">
+              <button
+                className="btn btn-outline"
+                onClick={() => {
+                  setShowEventModal(false);
+                  setEventToEdit(null);
+                }}
+              >
+                Cancel
+              </button>
+              <button
+                className="btn btn-primary"
+                onClick={() => {
+                  // Handle form submission
+                  const mockData = {
+                    title: "New Event",
+                    date: new Date().toISOString(),
+                    location: "Community Center",
+                    description: "Event description",
+                    type: "meeting"
+                  };
+                  handleSaveEvent(mockData);
+                }}
+              >
+                Save
+              </button>
+            </div>
           </div>
         </div>
       )}
