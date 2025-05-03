@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { Calendar, Users, Eye, Radio, ArrowUp, ArrowDown } from "lucide-react";
+import { Calendar, Users, Eye, Radio, ArrowUp, ArrowDown, X, Bell } from "lucide-react";
 import Chart from "react-apexcharts";
 import { fetchActivities, countActivitiesByType } from "../services/activityService";
 import { fetchEvents } from "../services/eventService";
@@ -11,6 +11,7 @@ const Dashboard = () => {
   const [activityCounts, setActivityCounts] = useState([]);
   const [upcomingEvents, setUpcomingEvents] = useState(0);
   const [error, setError] = useState(null);
+  const [showBanner, setShowBanner] = useState(true);
 
   // Fetch dashboard data on component mount
   useEffect(() => {
@@ -208,10 +209,44 @@ const Dashboard = () => {
 
   return (
     <div className="container mx-auto px-4 py-6">
-      <div className="mb-8">
+      <div className="mb-6">
         <Heading1>Dashboard</Heading1>
         <Paragraph className="mt-2">Overview of community activity and metrics</Paragraph>
       </div>
+      
+      {/* Banner Component */}
+      {showBanner && (
+        <div className="relative mb-8 rounded-xl overflow-hidden shadow-lg bg-gradient-to-r from-blue-500 to-purple-600">
+          <div className="absolute top-4 right-4">
+            <button 
+              onClick={() => setShowBanner(false)}
+              className="text-white hover:text-blue-100 transition-colors"
+              aria-label="Close banner"
+            >
+              <X size={20} />
+            </button>
+          </div>
+          <div className="px-6 py-8 md:flex md:items-center md:justify-between">
+            <div className="flex items-start mb-4 md:mb-0">
+              <div className="hidden md:flex items-center justify-center h-12 w-12 rounded-full bg-white/20 text-white mr-4 flex-shrink-0">
+                <Bell size={24} />
+              </div>
+              <div>
+                <Heading2 className="text-white mb-2">Welcome to the Community Hub!</Heading2>
+                <Paragraph className="text-blue-100 mb-0">Stay updated with the latest community events and announcements. Check out the new features and resources available to all members.</Paragraph>
+              </div>
+            </div>
+            <div className="mt-4 md:mt-0 md:ml-6 flex-shrink-0">
+              <button 
+                className="inline-flex items-center px-5 py-2.5 border border-transparent text-sm font-medium rounded-md shadow-sm text-blue-700 bg-white hover:bg-blue-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors"
+                onClick={() => window.open('/events', '_self')}
+              >
+                Explore Events
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
       
       {/* Stats Cards */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
