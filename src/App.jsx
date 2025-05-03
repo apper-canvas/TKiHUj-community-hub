@@ -5,6 +5,7 @@ import { Sun, Moon, Menu, X, Bell, Calendar, Wrench, User, LogOut } from "lucide
 import { motion, AnimatePresence } from "framer-motion";
 import { clearUser } from './store/userSlice';
 import ProtectedRoute from './components/ProtectedRoute';
+import { Heading1 } from './components/ui/Typography';
 import Home from "./pages/Home";
 import Dashboard from "./pages/Dashboard";
 import Events from "./pages/Events";
@@ -53,7 +54,7 @@ const Sidebar = ({ isOpen, toggleSidebar }) => {
         } md:translate-x-0 transition-transform duration-300 ease-in-out`}
       >
         <div className="p-4 flex justify-between items-center border-b">
-          <h1 className="text-2xl font-bold text-blue-600">Community Hub</h1>
+          <Heading1 className="text-2xl m-0 text-primary">Community Hub</Heading1>
           <button 
             onClick={toggleSidebar} 
             className="md:hidden p-2 rounded-md hover:bg-gray-100"
