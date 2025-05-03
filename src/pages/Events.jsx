@@ -2,6 +2,7 @@ import React, { useState, useEffect } from "react";
 import { Calendar, MapPin, Clock, Filter, Plus, ChevronLeft, ChevronRight } from "lucide-react";
 import { format, addMonths, subMonths, startOfMonth, endOfMonth, eachDayOfInterval, getDay, isSameMonth, isToday, isSameDay } from "date-fns";
 import { fetchEvents, createEvent, updateEvent, deleteEvent } from "../services/eventService";
+import { Heading1, Heading2, Heading3, Heading4, Paragraph } from "../components/ui/Typography";
 
 const Events = () => {
   const [currentMonth, setCurrentMonth] = useState(new Date());
@@ -255,8 +256,8 @@ const Events = () => {
     <div className="container mx-auto px-4 py-6">
       <div className="flex justify-between items-center mb-8">
         <div>
-          <h1 className="text-3xl font-bold">Events</h1>
-          <p className="text-gray-600 mt-2">Browse and manage community events</p>
+          <Heading1>Events</Heading1>
+          <Paragraph className="mt-2">Browse and manage community events</Paragraph>
         </div>
         <button 
           className="btn btn-primary"
@@ -288,9 +289,7 @@ const Events = () => {
             <button onClick={prevMonth} className="p-2 hover:bg-gray-100 rounded-full">
               <ChevronLeft size={20} />
             </button>
-            <h2 className="text-xl font-bold px-4">
-              {format(currentMonth, 'MMMM yyyy')}
-            </h2>
+            <Heading2 className="px-4 mb-0">{format(currentMonth, 'MMMM yyyy')}</Heading2>
             <button onClick={nextMonth} className="p-2 hover:bg-gray-100 rounded-full">
               <ChevronRight size={20} />
             </button>
@@ -321,7 +320,7 @@ const Events = () => {
                       </div>
                       
                       <div className="flex-1">
-                        <h3 className="text-xl font-semibold">{event.title}</h3>
+                        <Heading3 className="mb-2">{event.title}</Heading3>
                         <div className="mt-2 flex flex-col gap-1">
                           <div className="flex items-center text-gray-600">
                             <Clock size={16} className="mr-1" />
@@ -368,8 +367,8 @@ const Events = () => {
                   <div className="text-gray-400 mb-3">
                     <Calendar size={48} className="mx-auto" />
                   </div>
-                  <h3 className="text-xl font-medium mb-1">No events found</h3>
-                  <p className="text-gray-500">Create your first event by clicking the "Create Event" button</p>
+                  <Heading3 className="mb-1">No events found</Heading3>
+                  <Paragraph>Create your first event by clicking the "Create Event" button</Paragraph>
                 </div>
               )}
             </div>
@@ -380,13 +379,13 @@ const Events = () => {
       {viewMode === 'month' && selectedDateEvents.length > 0 && (
         <div className="bg-white rounded-xl shadow-md overflow-hidden">
           <div className="p-4 border-b">
-            <h2 className="text-xl font-bold">Events on {format(selectedDate, 'MMMM d, yyyy')}</h2>
+            <Heading2 className="mb-0">Events on {format(selectedDate, 'MMMM d, yyyy')}</Heading2>
           </div>
           
           <div className="p-4 space-y-4">
             {selectedDateEvents.map(event => (
               <div key={event.Id} className="border rounded-lg p-4">
-                <h3 className="text-xl font-semibold">{event.title}</h3>
+                <Heading3 className="mb-2">{event.title}</Heading3>
                 <div className="mt-2 flex items-center gap-4">
                   <div className="flex items-center text-gray-600">
                     <Clock size={16} className="mr-1" />
@@ -430,9 +429,9 @@ const Events = () => {
       {showEventModal && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
           <div className="bg-white rounded-lg shadow-xl p-6 max-w-lg w-full max-h-[90vh] overflow-y-auto">
-            <h2 className="text-2xl font-bold mb-4">
+            <Heading2 className="mb-4">
               {eventToEdit ? "Edit Event" : "Create Event"}
-            </h2>
+            </Heading2>
             <div className="mb-4">
               <label className="block text-gray-700 mb-2">Title</label>
               <input

@@ -3,6 +3,7 @@ import { useNavigate, Link } from 'react-router-dom';
 import { useDispatch, useSelector } from 'react-redux';
 import { setUser, setLoading, setError } from '../store/userSlice';
 import { getApperUI, getApperClient } from '../services/apperService';
+import { Heading1, Heading2, Paragraph } from '../components/ui/Typography';
 
 function Signup() {
   const navigate = useNavigate();
@@ -57,14 +58,14 @@ function Signup() {
   return (
     <div className="min-h-screen bg-gray-50 flex flex-col justify-center py-12 sm:px-6 lg:px-8">
       <div className="sm:mx-auto sm:w-full sm:max-w-md">
-        <h1 className="text-center text-3xl font-bold text-blue-600">CommUnity Hub</h1>
-        <h2 className="mt-6 text-center text-3xl font-extrabold text-gray-900">Create a new account</h2>
-        <p className="mt-2 text-center text-sm text-gray-600">
+        <Heading1 className="text-center text-blue-600">CommUnity Hub</Heading1>
+        <Heading2 className="mt-6 text-center">Create a new account</Heading2>
+        <Paragraph className="mt-2 text-center text-sm text-gray-600">
           Or{' '}
           <Link to="/login" className="font-medium text-blue-600 hover:text-blue-500">
             sign in to your existing account
           </Link>
-        </p>
+        </Paragraph>
       </div>
 
       <div className="mt-8 sm:mx-auto sm:w-full sm:max-w-md">

@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { FileText, Download, Link as LinkIcon, ExternalLink, Search, Plus, Filter, ChevronDown } from "lucide-react";
 import { fetchResources, createResource, updateResource, deleteResource } from "../services/resourceService";
+import { Heading1, Heading2, Heading3, Paragraph } from "../components/ui/Typography";
 
 const Resources = () => {
   const [resources, setResources] = useState([]);
@@ -167,8 +168,8 @@ const Resources = () => {
     <div className="container mx-auto px-4 py-6">
       <div className="flex justify-between items-center mb-8">
         <div>
-          <h1 className="text-3xl font-bold">Resources</h1>
-          <p className="text-gray-600 mt-2">Access and download community resources</p>
+          <Heading1>Resources</Heading1>
+          <Paragraph className="mt-2">Access and download community resources</Paragraph>
         </div>
         <button 
           className="btn btn-primary"
@@ -182,7 +183,7 @@ const Resources = () => {
       {/* Featured Resources */}
       {featuredResources.length > 0 && (
         <div className="mb-8">
-          <h2 className="text-xl font-bold mb-4">Featured Resources</h2>
+          <Heading2 className="mb-4">Featured Resources</Heading2>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
             {featuredResources.map(resource => (
               <div key={resource.Id} className="card hover:shadow-md transition-shadow">
@@ -201,8 +202,8 @@ const Resources = () => {
                       {resource.category}
                     </div>
                   </div>
-                  <h3 className="text-lg font-bold mb-2">{resource.title}</h3>
-                  <p className="text-gray-600 mb-4">{resource.description}</p>
+                  <Heading3 className="mb-2">{resource.title}</Heading3>
+                  <Paragraph className="mb-4">{resource.description}</Paragraph>
                   <div className="flex justify-between items-center">
                     {resource.type === 'document' ? (
                       <div className="text-sm text-gray-500">
@@ -303,7 +304,7 @@ const Resources = () => {
       {/* Resource List */}
       <div className="bg-white rounded-xl shadow-md overflow-hidden">
         <div className="p-4 border-b">
-          <h2 className="text-xl font-bold">All Resources</h2>
+          <Heading2 className="mb-0">All Resources</Heading2>
         </div>
         
         <div className="divide-y">
@@ -323,7 +324,7 @@ const Resources = () => {
                   
                   <div className="flex-1 min-w-0">
                     <div className="flex items-center gap-2">
-                      <h3 className="font-bold">{resource.title}</h3>
+                      <Heading3 className="mb-0 font-bold">{resource.title}</Heading3>
                       <span className="px-2 py-0.5 rounded-full bg-blue-100 text-blue-700 text-xs font-medium">
                         {resource.category}
                       </span>
@@ -377,8 +378,8 @@ const Resources = () => {
               <div className="text-gray-400 mb-3">
                 <Search size={48} className="mx-auto" />
               </div>
-              <h3 className="text-xl font-medium mb-1">No resources found</h3>
-              <p className="text-gray-500">Try adjusting your search or filter criteria</p>
+              <Heading3 className="mb-1">No resources found</Heading3>
+              <Paragraph>Try adjusting your search or filter criteria</Paragraph>
             </div>
           )}
         </div>
@@ -388,9 +389,9 @@ const Resources = () => {
       {showResourceModal && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
           <div className="bg-white rounded-lg shadow-xl p-6 max-w-lg w-full max-h-[90vh] overflow-y-auto">
-            <h2 className="text-2xl font-bold mb-4">
+            <Heading2 className="mb-4">
               {resourceToEdit ? "Edit Resource" : "Add Resource"}
-            </h2>
+            </Heading2>
             <div className="mb-4">
               <label className="block text-gray-700 mb-2">Title</label>
               <input

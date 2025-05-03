@@ -1,12 +1,13 @@
 import React from "react";
 import MainFeature from "../components/MainFeature";
+import { Heading1, Heading2, Heading3, Paragraph } from "../components/ui/Typography";
 
 const Home = () => {
   return (
     <div className="container mx-auto px-4 py-6">
       <div className="mb-8">
-        <h1 className="text-3xl font-bold">Welcome to Community Hub</h1>
-        <p className="text-gray-600 mt-2">Connect, share, and stay updated with your community</p>
+        <Heading1>Welcome to Community Hub</Heading1>
+        <Paragraph className="mt-2">Connect, share, and stay updated with your community</Paragraph>
       </div>
       
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
@@ -14,7 +15,7 @@ const Home = () => {
           <MainFeature />
           
           <div className="mt-6 card p-6">
-            <h2 className="text-2xl font-bold mb-4">Recent Activity</h2>
+            <Heading2 className="mb-4">Recent Activity</Heading2>
             <div className="space-y-4">
               {[1, 2, 3].map((item) => (
                 <div key={item} className="border-b pb-4 last:border-0">
@@ -24,7 +25,7 @@ const Home = () => {
                     </div>
                     <div>
                       <div className="flex items-center gap-2">
-                        <h3 className="font-semibold">John Doe</h3>
+                        <Heading3 className="mb-0 font-semibold">John Doe</Heading3>
                         <span className="text-sm text-gray-500">3h ago</span>
                       </div>
                       <p className="mt-1">Shared a new announcement about the upcoming community event this weekend.</p>
@@ -41,7 +42,7 @@ const Home = () => {
         
         <div>
           <div className="card p-6 mb-6">
-            <h2 className="text-xl font-bold mb-4">Upcoming Events</h2>
+            <Heading2 className="mb-4">Upcoming Events</Heading2>
             <div className="space-y-4">
               {[1, 2, 3].map((item) => (
                 <div key={item} className="flex gap-3 border-b pb-4 last:border-0">
@@ -50,7 +51,7 @@ const Home = () => {
                     <span className="text-lg font-bold leading-none">{item + 14}</span>
                   </div>
                   <div>
-                    <h3 className="font-semibold">Community Meetup</h3>
+                    <Heading3 className="mb-0 font-semibold">Community Meetup</Heading3>
                     <p className="text-sm text-gray-600">3:00 PM at Community Center</p>
                   </div>
                 </div>
@@ -60,11 +61,11 @@ const Home = () => {
           </div>
           
           <div className="card p-6">
-            <h2 className="text-xl font-bold mb-4">Community Resources</h2>
+            <Heading2 className="mb-4">Community Resources</Heading2>
             <div className="space-y-3">
               {["Community Guidelines", "Emergency Contacts", "Maintenance Request", "Neighborhood Watch"].map((item, index) => (
                 <div key={index} className="p-3 rounded-lg border hover:bg-gray-50 transition-colors cursor-pointer">
-                  <h3 className="font-medium">{item}</h3>
+                  <Heading3 className="mb-0 font-medium">{item}</Heading3>
                 </div>
               ))}
             </div>

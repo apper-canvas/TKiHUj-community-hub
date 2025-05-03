@@ -3,6 +3,7 @@ import { Calendar, Users, Eye, Radio, ArrowUp, ArrowDown } from "lucide-react";
 import Chart from "react-apexcharts";
 import { fetchActivities, countActivitiesByType } from "../services/activityService";
 import { fetchEvents } from "../services/eventService";
+import { Heading1, Heading2, Heading3, Paragraph } from "../components/ui/Typography";
 
 const Dashboard = () => {
   const [loading, setLoading] = useState(true);
@@ -208,8 +209,8 @@ const Dashboard = () => {
   return (
     <div className="container mx-auto px-4 py-6">
       <div className="mb-8">
-        <h1 className="text-3xl font-bold">Dashboard</h1>
-        <p className="text-gray-600 mt-2">Overview of community activity and metrics</p>
+        <Heading1>Dashboard</Heading1>
+        <Paragraph className="mt-2">Overview of community activity and metrics</Paragraph>
       </div>
       
       {/* Stats Cards */}
@@ -220,8 +221,8 @@ const Dashboard = () => {
             <div key={index} className="card p-6">
               <div className="flex justify-between items-start">
                 <div>
-                  <h3 className="text-gray-500 font-medium">{stat.title}</h3>
-                  <p className="text-3xl font-bold mt-1">{stat.value}</p>
+                  <Heading3 className="text-gray-500 font-medium mb-1">{stat.title}</Heading3>
+                  <p className="text-3xl font-bold">{stat.value}</p>
                 </div>
                 <div className="h-12 w-12 rounded-full bg-blue-100 flex items-center justify-center text-blue-600">
                   <Icon size={24} />
@@ -239,7 +240,7 @@ const Dashboard = () => {
       {/* Charts */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-8">
         <div className="card p-6">
-          <h2 className="text-xl font-bold mb-6">Community Activity</h2>
+          <Heading2 className="mb-6">Community Activity</Heading2>
           <Chart 
             options={communityActivityOptions}
             series={communityActivitySeries}
@@ -249,7 +250,7 @@ const Dashboard = () => {
         </div>
         
         <div className="card p-6">
-          <h2 className="text-xl font-bold mb-6">Member Distribution</h2>
+          <Heading2 className="mb-6">Member Distribution</Heading2>
           <Chart 
             options={memberDistributionOptions}
             series={memberDistributionSeries}
@@ -261,7 +262,7 @@ const Dashboard = () => {
       
       {/* Recent Activity */}
       <div className="card p-6">
-        <h2 className="text-xl font-bold mb-6">Recent Activities</h2>
+        <Heading2 className="mb-6">Recent Activities</Heading2>
         <div className="overflow-x-auto">
           <table className="w-full min-w-full">
             <thead>
